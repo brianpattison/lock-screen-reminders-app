@@ -4,30 +4,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-An iOS app that provides a Home Screen widget for the Reminders app. The widget displays **three** reminders from a user-chosen list (vs Apple's native widget which shows two). Tapping the widget opens the Reminders app to the selected list rather than marking reminders as completed.
+An iOS app that provides a Lock Screen widget for the Reminders app. The widget displays **three** reminders from a user-chosen list (vs Apple's native Lock Screen widget which shows two). Tapping the widget opens the Reminders app to the selected list rather than marking reminders as completed.
 
 ## Tech Stack
 
 - **Language:** Swift
-- **Frameworks:** SwiftUI, WidgetKit
-- **Platform:** iOS
-- **Build System:** Xcode
+- **Frameworks:** SwiftUI, WidgetKit, App Intents, EventKit
+- **Platform:** iOS 17+
+- **Build System:** Xcode (project generated via XcodeGen from `project.yml`)
 
 ## Build Commands
 
 ```bash
+# Generate Xcode project (required after changing project.yml)
+xcodegen generate
+
 # Build the project
-xcodebuild -scheme RemindersWidget -destination 'platform=iOS Simulator,name=iPhone 16' build
+xcodebuild build -scheme RemindersWidget -destination 'platform=iOS Simulator,name=iPhone 16' -quiet
 
 # Run tests
-xcodebuild -scheme RemindersWidget -destination 'platform=iOS Simulator,name=iPhone 16' test
+xcodebuild test -scheme RemindersWidgetTests -destination 'platform=iOS Simulator,name=iPhone 16' -quiet
 ```
 
 ## Architecture
 
-This is an iOS app with a widget extension:
+Two targets in one Xcode project:
 
-- **Main App Target:** Configuration UI for selecting which Reminders list to display
-- **Widget Extension:** WidgetKit-based home screen widget that reads reminders via EventKit and displays three items from the chosen list
-- Uses `EventKit` / `EKReminder` for accessing the user's reminders
-- Widget tap uses deep linking to open the Reminders app to the relevant list
+- **RemindersWidget** (host app): Minimal SwiftUI app that requests EventKit permission and shows Lock Screen widget setup instructions. Handles widget tap by redirecting to the Reminders app.
+- **RemindersWidgetExtension** (widget extension): `accessoryRectangular` Lock Screen widget using `AppIntentConfiguration`. Users pick a Reminders list via Edit Widget (powered by `SelectListIntent` + `ReminderListEntity`). The `RemindersTimelineProvider` fetches incomplete reminders via EventKit, sorts by due date then creation date, and displays the first 3.
+- **Shared/**: `ReminderItem` model and `sortReminders()` function, compiled into both the extension and test targets.

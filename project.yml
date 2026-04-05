@@ -18,10 +18,9 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         INFOPLIST_KEY_CFBundleDisplayName: Reminders Widget
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-    info:
-      properties:
-        UILaunchScreen: {}
-        NSRemindersFullAccessUsageDescription: "This app needs access to your reminders to display them in the Lock Screen widget."
+        INFOPLIST_KEY_UILaunchScreen_Generation: true
+        INFOPLIST_KEY_NSRemindersFullAccessUsageDescription: "This app needs access to your reminders to display them in the Lock Screen widget."
+        GENERATE_INFOPLIST_FILE: true
     dependencies:
       - target: RemindersWidgetExtension
   RemindersWidgetExtension:
@@ -29,6 +28,8 @@ targets:
     platform: iOS
     sources:
       - path: RemindersWidgetExtension
+        excludes:
+          - Info.plist
       - path: Shared
     settings:
       base:
@@ -36,11 +37,7 @@ targets:
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
         INFOPLIST_KEY_CFBundleDisplayName: Reminders Widget
-    info:
-      properties:
-        NSExtension:
-          NSExtensionPointIdentifier: com.apple.widgetkit-extension
-        NSRemindersFullAccessUsageDescription: "This widget needs access to your reminders to display them on your Lock Screen."
+        INFOPLIST_FILE: RemindersWidgetExtension/Info.plist
   RemindersWidgetTests:
     type: bundle.unit-test
     platform: iOS
@@ -50,7 +47,24 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.brianpattison.RemindersWidget.Tests
-    info:
-      properties: {}
+        GENERATE_INFOPLIST_FILE: true
     dependencies:
       - target: RemindersWidget
+schemes:
+  RemindersWidget:
+    build:
+      targets:
+        RemindersWidget: all
+        RemindersWidgetExtension: all
+        RemindersWidgetTests: [test]
+    test:
+      targets:
+        - RemindersWidgetTests
+  RemindersWidgetTests:
+    build:
+      targets:
+        RemindersWidgetTests: all
+        RemindersWidget: all
+    test:
+      targets:
+        - RemindersWidgetTests
