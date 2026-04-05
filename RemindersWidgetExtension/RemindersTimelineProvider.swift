@@ -42,10 +42,9 @@ struct RemindersTimelineProvider: AppIntentTimelineProvider {
         let ekReminders: [EKReminder]
 
         if listEntity.isToday {
-            let startOfDay = Calendar.current.startOfDay(for: Date())
-            let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+            let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
             let predicate = store.predicateForIncompleteReminders(
-                withDueDateStarting: startOfDay,
+                withDueDateStarting: .distantPast,
                 ending: endOfDay,
                 calendars: nil
             )
