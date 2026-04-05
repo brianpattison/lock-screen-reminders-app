@@ -10,15 +10,9 @@ struct RemindersLockScreenWidget: Widget {
             intent: SelectListIntent.self,
             provider: RemindersTimelineProvider()
         ) { entry in
-            let url: URL = {
-                if let id = entry.firstReminderExternalID {
-                    return URL(string: "reminderswidget://open?reminder=\(id)")!
-                }
-                return URL(string: "reminderswidget://open")!
-            }()
             RemindersWidgetView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
-                .widgetURL(url)
+                .widgetURL(URL(string: "reminderswidget://open")!)
         }
         .configurationDisplayName("Reminders")
         .description("Display reminders from a chosen list.")

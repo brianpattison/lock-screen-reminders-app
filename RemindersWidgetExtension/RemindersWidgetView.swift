@@ -21,12 +21,21 @@ struct RemindersWidgetView: View {
         case .configured:
             VStack(alignment: .leading, spacing: 2) {
                 ForEach(Array(entry.reminders.enumerated()), id: \.offset) { _, reminder in
-                    HStack(spacing: 4) {
-                        Image(systemName: "circle")
-                            .font(.system(size: 10))
-                        Text(reminder.title)
-                            .font(.caption)
-                            .lineLimit(1)
+                    let destination: URL = {
+                        if let id = reminder.externalID {
+                            return URL(string: "reminderswidget://open?reminder=\(id)")!
+                        }
+                        return URL(string: "reminderswidget://open")!
+                    }()
+                    Link(destination: destination) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "circle")
+                                .font(.system(size: 10))
+                            Text(reminder.title)
+                                .font(.caption)
+                                .lineLimit(1)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
             }

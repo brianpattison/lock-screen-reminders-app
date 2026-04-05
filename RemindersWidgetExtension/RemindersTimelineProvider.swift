@@ -12,8 +12,7 @@ struct RemindersTimelineProvider: AppIntentTimelineProvider {
                 ReminderItem(title: "Reminder 2", dueDate: nil, creationDate: nil, externalID: nil),
                 ReminderItem(title: "Reminder 3", dueDate: nil, creationDate: nil, externalID: nil),
             ],
-            state: .configured,
-            firstReminderExternalID: nil
+            state: .configured
         )
     }
 
@@ -33,11 +32,11 @@ struct RemindersTimelineProvider: AppIntentTimelineProvider {
     private func fetchEntry(for configuration: SelectListIntent) async -> ReminderEntry {
         let status = EKEventStore.authorizationStatus(for: .reminder)
         guard status == .fullAccess else {
-            return ReminderEntry(date: Date(), reminders: [], state: .noAccess, firstReminderExternalID: nil)
+            return ReminderEntry(date: Date(), reminders: [], state: .noAccess)
         }
 
         guard let listEntity = configuration.reminderList else {
-            return ReminderEntry(date: Date(), reminders: [], state: .notConfigured, firstReminderExternalID: nil)
+            return ReminderEntry(date: Date(), reminders: [], state: .notConfigured)
         }
 
         let ekReminders: [EKReminder]
@@ -57,7 +56,7 @@ struct RemindersTimelineProvider: AppIntentTimelineProvider {
         } else {
             let calendars = store.calendars(for: .reminder)
             guard let calendar = calendars.first(where: { $0.calendarIdentifier == listEntity.id }) else {
-                return ReminderEntry(date: Date(), reminders: [], state: .notConfigured, firstReminderExternalID: nil)
+                return ReminderEntry(date: Date(), reminders: [], state: .notConfigured)
             }
 
             let predicate = store.predicateForReminders(in: [calendar])
@@ -82,9 +81,9 @@ struct RemindersTimelineProvider: AppIntentTimelineProvider {
         let sorted = Array(sortReminders(items).prefix(3))
 
         if sorted.isEmpty {
-            return ReminderEntry(date: Date(), reminders: [], state: .empty, firstReminderExternalID: nil)
+            return ReminderEntry(date: Date(), reminders: [], state: .empty)
         }
 
-        return ReminderEntry(date: Date(), reminders: sorted, state: .configured, firstReminderExternalID: sorted.first?.externalID)
+        return ReminderEntry(date: Date(), reminders: sorted, state: .configured)
     }
 }
