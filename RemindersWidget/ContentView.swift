@@ -33,6 +33,9 @@ struct ContentView: View {
             Spacer()
             Spacer()
         }
+        .onAppear {
+            authStatus = EKEventStore.authorizationStatus(for: .reminder)
+        }
     }
 
     private var instructionsView: some View {

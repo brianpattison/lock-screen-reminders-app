@@ -2,6 +2,7 @@ import SwiftUI
 import WidgetKit
 
 struct RemindersLockScreenWidget: Widget {
+    static let widgetOpenURL = URL(string: "reminderswidget://open")!
     let kind = "RemindersLockScreenWidget"
 
     var body: some WidgetConfiguration {
@@ -12,7 +13,7 @@ struct RemindersLockScreenWidget: Widget {
         ) { entry in
             RemindersWidgetView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
-                .widgetURL(URL(string: "reminderswidget://open")!)
+                .widgetURL(Self.widgetOpenURL)
         }
         .configurationDisplayName("Reminders")
         .description("Display reminders from a chosen list.")
