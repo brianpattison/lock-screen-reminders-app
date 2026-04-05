@@ -19,9 +19,10 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.brianpattison.RemindersWidget
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
-        INFOPLIST_KEY_CFBundleDisplayName: LS Reminders
+        INFOPLIST_KEY_CFBundleDisplayName: Lock Screen
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_UILaunchScreen_Generation: true
+        INFOPLIST_KEY_UIRequiresFullScreen: true
         INFOPLIST_KEY_NSRemindersFullAccessUsageDescription: "This app needs access to your reminders to display them in the Lock Screen widget."
         GENERATE_INFOPLIST_FILE: true
     dependencies:
@@ -39,7 +40,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.brianpattison.RemindersWidget.WidgetExtension
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
-        INFOPLIST_KEY_CFBundleDisplayName: LS Reminders
+        INFOPLIST_KEY_CFBundleDisplayName: Lock Screen
         INFOPLIST_FILE: RemindersWidgetExtension/Info.plist
   RemindersWidgetTests:
     type: bundle.unit-test

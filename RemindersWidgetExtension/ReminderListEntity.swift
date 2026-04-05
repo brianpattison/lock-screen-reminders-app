@@ -1,5 +1,5 @@
 import AppIntents
-import EventKit
+@preconcurrency import EventKit
 
 struct ReminderListEntity: AppEntity {
     static var typeDisplayRepresentation: TypeDisplayRepresentation = "Reminder List"
@@ -19,7 +19,7 @@ struct ReminderListEntity: AppEntity {
 }
 
 struct ReminderListQuery: EntityQuery {
-    private let store = EKEventStore()
+    private nonisolated(unsafe) let store = EKEventStore()
 
     func entities(for identifiers: [String]) async throws -> [ReminderListEntity] {
         var results: [ReminderListEntity] = []
