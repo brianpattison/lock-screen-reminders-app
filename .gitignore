@@ -1,0 +1,11 @@
+# Xcode
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+build/
+
+# XcodeGen
+*.xcodeproj
+
+# Superpowers
+.superpowers/
