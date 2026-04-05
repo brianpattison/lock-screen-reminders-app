@@ -43,7 +43,7 @@ struct ContentView: View {
             Text("To add the widget:")
                 .font(.headline)
                 .foregroundStyle(.primary)
-            Text("Long press your Lock Screen, tap **Customize**, select the Lock Screen, then tap the widget area below the clock to add the **Reminders** widget.")
+            Text("Long press your Lock Screen, tap **Customize**, select the Lock Screen, then tap the widget area below the clock to add the **Reminders** widget. Tap the widget to choose which list to display.")
                 .font(.subheadline)
         }
     }

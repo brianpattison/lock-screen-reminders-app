@@ -7,7 +7,7 @@ struct RemindersWidgetView: View {
     var body: some View {
         switch entry.state {
         case .notConfigured:
-            Text("Long press to choose a list")
+            Text("Customize Lock Screen to set list")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         case .noAccess:
