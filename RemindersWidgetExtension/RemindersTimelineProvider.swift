@@ -39,15 +39,32 @@ struct RemindersTimelineProvider: AppIntentTimelineProvider {
             return ReminderEntry(date: Date(), reminders: [], state: .notConfigured)
         }
 
-        let calendars = store.calendars(for: .reminder)
-        guard let calendar = calendars.first(where: { $0.calendarIdentifier == listEntity.id }) else {
-            return ReminderEntry(date: Date(), reminders: [], state: .notConfigured)
-        }
+        let ekReminders: [EKReminder]
 
-        let predicate = store.predicateForReminders(in: [calendar])
-        let ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
-            _ = store.fetchReminders(matching: predicate) { reminders in
-                continuation.resume(returning: reminders ?? [])
+        if listEntity.isToday {
+            let startOfDay = Calendar.current.startOfDay(for: Date())
+            let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+            let predicate = store.predicateForIncompleteReminders(
+                withDueDateStarting: startOfDay,
+                ending: endOfDay,
+                calendars: nil
+            )
+            ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
+                _ = store.fetchReminders(matching: predicate) { reminders in
+                    continuation.resume(returning: reminders ?? [])
+                }
+            }
+        } else {
+            let calendars = store.calendars(for: .reminder)
+            guard let calendar = calendars.first(where: { $0.calendarIdentifier == listEntity.id }) else {
+                return ReminderEntry(date: Date(), reminders: [], state: .notConfigured)
+            }
+
+            let predicate = store.predicateForReminders(in: [calendar])
+            ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
+                _ = store.fetchReminders(matching: predicate) { reminders in
+                    continuation.resume(returning: reminders ?? [])
+                }
             }
         }
 
