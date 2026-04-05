@@ -12,7 +12,7 @@ struct ContentView: View {
                 .font(.system(size: 64))
                 .foregroundStyle(.tint)
 
-            Text("Reminders Widget")
+            Text("Lock Screen Reminders")
                 .font(.largeTitle)
                 .fontWeight(.bold)
 
