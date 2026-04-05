@@ -2,7 +2,6 @@ import SwiftUI
 import WidgetKit
 
 struct RemindersLockScreenWidget: Widget {
-    static let widgetOpenURL = URL(string: "reminderswidget://open")!
     let kind = "RemindersLockScreenWidget"
 
     var body: some WidgetConfiguration {
@@ -11,9 +10,15 @@ struct RemindersLockScreenWidget: Widget {
             intent: SelectListIntent.self,
             provider: RemindersTimelineProvider()
         ) { entry in
+            let url: URL = {
+                if let id = entry.firstReminderExternalID {
+                    return URL(string: "reminderswidget://open?reminder=\(id)")!
+                }
+                return URL(string: "reminderswidget://open")!
+            }()
             RemindersWidgetView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
-                .widgetURL(Self.widgetOpenURL)
+                .widgetURL(url)
         }
         .configurationDisplayName("Reminders")
         .description("Display reminders from a chosen list.")

@@ -4,6 +4,7 @@ struct ReminderItem {
     let title: String
     let dueDate: Date?
     let creationDate: Date?
+    let externalID: String?
 }
 
 func sortReminders(_ reminders: [ReminderItem]) -> [ReminderItem] {
