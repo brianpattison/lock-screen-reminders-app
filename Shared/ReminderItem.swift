@@ -5,6 +5,14 @@ struct ReminderItem {
     let dueDate: Date?
     let creationDate: Date?
     let externalID: String?
+
+    var widgetURL: URL {
+        if let externalID,
+           let encoded = externalID.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+            return URL(string: "reminderswidget://open?reminder=\(encoded)")!
+        }
+        return URL(string: "reminderswidget://open")!
+    }
 }
 
 func sortReminders(_ reminders: [ReminderItem]) -> [ReminderItem] {

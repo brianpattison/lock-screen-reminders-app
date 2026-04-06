@@ -38,4 +38,8 @@ struct ReminderListQuery: EntityQuery {
             .sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
         return [.today] + calendars
     }
+
+    func defaultResult() async -> ReminderListEntity? {
+        return .today
+    }
 }
