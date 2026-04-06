@@ -33,3 +33,10 @@ Two targets in one Xcode project:
 - **RemindersWidget** (host app): Minimal SwiftUI app that requests EventKit permission and shows Lock Screen widget setup instructions. Handles widget tap by redirecting to the Reminders app.
 - **RemindersWidgetExtension** (widget extension): `accessoryRectangular` Lock Screen widget using `AppIntentConfiguration`. Users pick a Reminders list via Edit Widget (powered by `SelectListIntent` + `ReminderListEntity`). The `RemindersTimelineProvider` fetches incomplete reminders via EventKit, sorts by due date then creation date, and displays the first 3.
 - **Shared/**: `ReminderItem` model and `sortReminders()` function, compiled into both the extension and test targets.
+
+## App Icon
+
+```bash
+# Generate the app icon (requires numpy and Pillow)
+python3 generate_icon.py AppIcon.png
+```

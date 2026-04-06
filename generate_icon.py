@@ -8,11 +8,16 @@ each glowing with warm amber light — an abstract notation
 of three thoughts held at the threshold of attention.
 """
 
+import sys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
+if len(sys.argv) != 2:
+    print("Usage: python3 generate_icon.py <output_path>")
+    sys.exit(1)
+
 SIZE = 1024
-OUTPUT = "/Users/brian/github/brianpattison/lock-screen-reminders-app/AppIcon.png"
+OUTPUT = sys.argv[1]
 
 # =============================================================
 # 1. BACKGROUND: Deep indigo radial gradient
@@ -74,14 +79,14 @@ img = Image.alpha_composite(img, warm2)
 # 4. LINE & CIRCLE PARAMETERS
 # =============================================================
 
-line_h = 14       # Bold enough for small icon sizes
-line_r = 7        # Perfect pill ends
-line_widths = [320, 410, 500]  # Shortest to longest, top to bottom
+line_h = 18       # Bold enough for small icon sizes
+line_r = 9        # Perfect pill ends
+line_widths = [280, 370, 460]  # Shortest to longest, top to bottom
 line_gap = 72     # Between centers — wider for distinct glow halos
 
 # Circle parameters (unfilled outline circles)
-circle_d = 38       # Circle diameter
-circle_stroke = 3   # Outline width
+circle_d = 44       # Circle diameter
+circle_stroke = 4   # Outline width
 circle_gap = 24     # Between circle right edge and line left edge
 
 # Layout — left-aligned lines with circles, group centered
