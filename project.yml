@@ -25,6 +25,7 @@ targets:
         INFOPLIST_KEY_UIRequiresFullScreen: true
         INFOPLIST_KEY_NSRemindersFullAccessUsageDescription: "This app needs access to your reminders to display them in the Lock Screen widget."
         GENERATE_INFOPLIST_FILE: true
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: false
     dependencies:
       - target: RemindersWidgetExtension
   RemindersWidgetExtension:
