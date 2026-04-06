@@ -79,15 +79,15 @@ img = Image.alpha_composite(img, warm2)
 # 4. LINE & CIRCLE PARAMETERS
 # =============================================================
 
-line_h = 18       # Bold enough for small icon sizes
-line_r = 9        # Perfect pill ends
-line_widths = [280, 370, 460]  # Shortest to longest, top to bottom
-line_gap = 72     # Between centers — wider for distinct glow halos
+line_h = 26       # Thicker for small icon visibility
+line_r = 13       # Perfect pill ends
+line_widths = [200, 280, 360]  # Shorter lines, easier to read small
+line_gap = 96     # Between centers — wider for bigger elements
 
 # Circle parameters (unfilled outline circles)
-circle_d = 44       # Circle diameter
-circle_stroke = 4   # Outline width
-circle_gap = 24     # Between circle right edge and line left edge
+circle_d = 64       # Bigger circles for small icon visibility
+circle_stroke = 7   # Thicker outline to match line weight
+circle_gap = 22     # Between circle right edge and line left edge
 
 # Layout — left-aligned lines with circles, group centered
 max_line_w = max(line_widths)
