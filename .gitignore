@@ -5,8 +5,8 @@
 DerivedData/
 build/
 
-# XcodeGen
-*.xcodeproj
+# XcodeGen - xcodeproj is committed for Xcode Cloud compatibility
+# *.xcodeproj
 
 # Superpowers
 .superpowers/
