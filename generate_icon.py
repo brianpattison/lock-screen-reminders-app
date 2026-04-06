@@ -12,7 +12,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 SIZE = 1024
-OUTPUT = "/Users/brian/github/brianpattison/reminders-home-screen-widget/AppIcon.png"
+OUTPUT = "/Users/brian/github/brianpattison/lock-screen-reminders-app/AppIcon.png"
 
 # =============================================================
 # 1. BACKGROUND: Deep indigo radial gradient
@@ -71,13 +71,26 @@ warm2 = warm2.filter(ImageFilter.GaussianBlur(radius=90))
 img = Image.alpha_composite(img, warm2)
 
 # =============================================================
-# 4. LINE PARAMETERS
+# 4. LINE & CIRCLE PARAMETERS
 # =============================================================
 
 line_h = 14       # Bold enough for small icon sizes
 line_r = 7        # Perfect pill ends
-line_widths = [500, 410, 320]  # Tapering triad
-line_gap = 62     # Between centers — wider for distinct glow halos
+line_widths = [320, 410, 500]  # Shortest to longest, top to bottom
+line_gap = 72     # Between centers — wider for distinct glow halos
+
+# Circle parameters (unfilled outline circles)
+circle_d = 38       # Circle diameter
+circle_stroke = 3   # Outline width
+circle_gap = 24     # Between circle right edge and line left edge
+
+# Layout — left-aligned lines with circles, group centered
+max_line_w = max(line_widths)
+group_w = circle_d + circle_gap + max_line_w
+group_left = (SIZE - group_w) // 2
+
+circle_cx = group_left + circle_d // 2
+line_left = group_left + circle_d + circle_gap
 
 # Centered vertically
 center_y = SIZE // 2
@@ -93,14 +106,20 @@ amber_bright = (250, 215, 125) # Luminous center
 
 g0 = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
 g0d = ImageDraw.Draw(g0)
+pad = 20
 for i, w in enumerate(line_widths):
-    x0 = (SIZE - w) // 2
     yc = line_centers_y[i]
     y0 = yc - line_h // 2
     g0d.rounded_rectangle(
-        [x0 - 20, y0 - 20, x0 + w + 20, y0 + line_h + 20],
-        radius=line_r + 20,
+        [line_left - pad, y0 - pad, line_left + w + pad, y0 + line_h + pad],
+        radius=line_r + pad,
         fill=(*amber, 70),
+    )
+    cr = circle_d // 2 + pad
+    g0d.ellipse(
+        [circle_cx - cr, yc - cr, circle_cx + cr, yc + cr],
+        outline=(*amber, 70),
+        width=circle_stroke + pad,
     )
 g0 = g0.filter(ImageFilter.GaussianBlur(radius=120))
 img = Image.alpha_composite(img, g0)
@@ -111,14 +130,20 @@ img = Image.alpha_composite(img, g0)
 
 g1 = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
 g1d = ImageDraw.Draw(g1)
+pad = 10
 for i, w in enumerate(line_widths):
-    x0 = (SIZE - w) // 2
     yc = line_centers_y[i]
     y0 = yc - line_h // 2
     g1d.rounded_rectangle(
-        [x0 - 10, y0 - 10, x0 + w + 10, y0 + line_h + 10],
-        radius=line_r + 10,
+        [line_left - pad, y0 - pad, line_left + w + pad, y0 + line_h + pad],
+        radius=line_r + pad,
         fill=(*amber, 120),
+    )
+    cr = circle_d // 2 + pad
+    g1d.ellipse(
+        [circle_cx - cr, yc - cr, circle_cx + cr, yc + cr],
+        outline=(*amber, 120),
+        width=circle_stroke + pad,
     )
 g1 = g1.filter(ImageFilter.GaussianBlur(radius=60))
 img = Image.alpha_composite(img, g1)
@@ -129,14 +154,20 @@ img = Image.alpha_composite(img, g1)
 
 g2 = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
 g2d = ImageDraw.Draw(g2)
+pad = 4
 for i, w in enumerate(line_widths):
-    x0 = (SIZE - w) // 2
     yc = line_centers_y[i]
     y0 = yc - line_h // 2
     g2d.rounded_rectangle(
-        [x0 - 4, y0 - 4, x0 + w + 4, y0 + line_h + 4],
-        radius=line_r + 4,
+        [line_left - pad, y0 - pad, line_left + w + pad, y0 + line_h + pad],
+        radius=line_r + pad,
         fill=(*amber_bright, 160),
+    )
+    cr = circle_d // 2 + pad
+    g2d.ellipse(
+        [circle_cx - cr, yc - cr, circle_cx + cr, yc + cr],
+        outline=(*amber_bright, 160),
+        width=circle_stroke + pad,
     )
 g2 = g2.filter(ImageFilter.GaussianBlur(radius=28))
 img = Image.alpha_composite(img, g2)
@@ -147,32 +178,45 @@ img = Image.alpha_composite(img, g2)
 
 g3 = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
 g3d = ImageDraw.Draw(g3)
+pad = 1
 for i, w in enumerate(line_widths):
-    x0 = (SIZE - w) // 2
     yc = line_centers_y[i]
     y0 = yc - line_h // 2
     g3d.rounded_rectangle(
-        [x0 - 1, y0 - 1, x0 + w + 1, y0 + line_h + 1],
-        radius=line_r + 1,
+        [line_left - pad, y0 - pad, line_left + w + pad, y0 + line_h + pad],
+        radius=line_r + pad,
         fill=(*amber_bright, 210),
+    )
+    cr = circle_d // 2 + pad
+    g3d.ellipse(
+        [circle_cx - cr, yc - cr, circle_cx + cr, yc + cr],
+        outline=(*amber_bright, 210),
+        width=circle_stroke + pad,
     )
 g3 = g3.filter(ImageFilter.GaussianBlur(radius=10))
 img = Image.alpha_composite(img, g3)
 
 # =============================================================
-# 9. SHARP LINES: The core forms
+# 9. SHARP LINES & CIRCLES: The core forms
 # =============================================================
 
 lines = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
 lines_draw = ImageDraw.Draw(lines)
 for i, w in enumerate(line_widths):
-    x0 = (SIZE - w) // 2
     yc = line_centers_y[i]
     y0 = yc - line_h // 2
+    # Line
     lines_draw.rounded_rectangle(
-        [x0, y0, x0 + w, y0 + line_h],
+        [line_left, y0, line_left + w, y0 + line_h],
         radius=line_r,
         fill=(*amber, 255),
+    )
+    # Unfilled circle
+    cr = circle_d // 2
+    lines_draw.ellipse(
+        [circle_cx - cr, yc - cr, circle_cx + cr, yc + cr],
+        outline=(*amber, 255),
+        width=circle_stroke,
     )
 img = Image.alpha_composite(img, lines)
 
@@ -186,13 +230,13 @@ hl_h = max(line_h - 6, 4)
 hl_r = max(hl_h // 2, 2)
 for i, w in enumerate(line_widths):
     hl_w = int(w * 0.65)
-    x0 = (SIZE - hl_w) // 2
+    x0 = line_left + (w - hl_w) // 2
     yc = line_centers_y[i]
     y0 = yc - hl_h // 2
     hl_draw.rounded_rectangle(
         [x0, y0, x0 + hl_w, y0 + hl_h],
         radius=hl_r,
-        fill=(255, 240, 185, 120),  # Brighter luminous peak
+        fill=(255, 240, 185, 120),
     )
 highlights = highlights.filter(ImageFilter.GaussianBlur(radius=6))
 img = Image.alpha_composite(img, highlights)
