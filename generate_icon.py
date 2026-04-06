@@ -59,7 +59,7 @@ img = Image.fromarray(bg_arr, "RGBA")
 warm = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
 warm_draw = ImageDraw.Draw(warm)
 warm_draw.ellipse(
-    [SIZE // 2 - 360, SIZE // 2 - 200, SIZE // 2 + 360, SIZE // 2 + 200],
+    [SIZE // 2 - 440, SIZE // 2 - 260, SIZE // 2 + 440, SIZE // 2 + 260],
     fill=(55, 40, 15, 70),
 )
 warm = warm.filter(ImageFilter.GaussianBlur(radius=140))
@@ -69,7 +69,7 @@ img = Image.alpha_composite(img, warm)
 warm2 = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
 warm2_draw = ImageDraw.Draw(warm2)
 warm2_draw.ellipse(
-    [SIZE // 2 - 240, SIZE // 2 - 100, SIZE // 2 + 240, SIZE // 2 + 100],
+    [SIZE // 2 - 320, SIZE // 2 - 140, SIZE // 2 + 320, SIZE // 2 + 140],
     fill=(65, 45, 12, 45),
 )
 warm2 = warm2.filter(ImageFilter.GaussianBlur(radius=90))
@@ -79,15 +79,15 @@ img = Image.alpha_composite(img, warm2)
 # 4. LINE & CIRCLE PARAMETERS
 # =============================================================
 
-line_h = 26       # Thicker for small icon visibility
-line_r = 13       # Perfect pill ends
-line_widths = [200, 280, 360]  # Shorter lines, easier to read small
-line_gap = 96     # Between centers — wider for bigger elements
+line_h = 36       # Thicker for small icon visibility
+line_r = 18       # Perfect pill ends
+line_widths = [280, 390, 500]  # Shorter lines, easier to read small
+line_gap = 134    # Between centers — wider for bigger elements
 
 # Circle parameters (unfilled outline circles)
-circle_d = 64       # Bigger circles for small icon visibility
-circle_stroke = 7   # Thicker outline to match line weight
-circle_gap = 22     # Between circle right edge and line left edge
+circle_d = 90       # Bigger circles for small icon visibility
+circle_stroke = 10  # Thicker outline to match line weight
+circle_gap = 30     # Between circle right edge and line left edge
 
 # Layout — left-aligned lines with circles, group centered
 max_line_w = max(line_widths)
