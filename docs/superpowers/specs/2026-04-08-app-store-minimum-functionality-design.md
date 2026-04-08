@@ -44,7 +44,7 @@ Single-screen app with two modes based on permission state:
 
 **After permission granted (main screen):**
 - App icon + title at top
-- **Dropdown list picker** — `Menu` showing all reminder lists + "Today". Defaults to "Today" on first launch. Selection persists to App Group UserDefaults and triggers widget timeline reload.
+- **Dropdown list picker** — `Menu` showing all reminder lists + "Today". No default selection; widget shows "not configured" until the user picks a list. Selection persists to App Group UserDefaults and triggers widget timeline reload.
 - **"Widget Preview" label + `ReminderListView`** in a styled container — live data from EventKit, same tap behavior (opens Reminders app via URL scheme)
 - **Setup hint** at bottom — compact Lock Screen customization instructions
 
