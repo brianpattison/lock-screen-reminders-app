@@ -72,17 +72,20 @@ struct ReminderDetailView: View {
     }
 
     private func reminderRow(_ reminder: ReminderItem) -> some View {
-        Button {
+        let isCompleting = completingIDs.contains(reminder.id)
+        return Button {
             completeReminder(reminder)
         } label: {
             HStack(spacing: 12) {
-                Image(systemName: "circle")
+                Image(systemName: isCompleting ? "checkmark.circle.fill" : "circle")
                     .font(.title2)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(isCompleting ? AnyShapeStyle(.tint) : AnyShapeStyle(.tertiary))
                 Text(reminder.title)
-                    .foregroundStyle(.primary)
+                    .strikethrough(isCompleting)
+                    .foregroundStyle(isCompleting ? .secondary : .primary)
             }
         }
+        .disabled(isCompleting)
     }
 
     private func completeReminder(_ reminder: ReminderItem) {
