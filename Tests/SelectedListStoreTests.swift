@@ -13,7 +13,7 @@ final class SelectedListStoreTests: XCTestCase {
     }
 
     override func tearDown() {
-        UserDefaults.standard.removePersistentDomain(forName: suiteName)
+        defaults.removePersistentDomain(forName: suiteName)
         super.tearDown()
     }
 
