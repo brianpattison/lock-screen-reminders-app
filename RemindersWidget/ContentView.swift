@@ -8,7 +8,6 @@ struct ContentView: View {
     @State private var selectedListTitle: String?
     @State private var availableLists: [(id: String, title: String)] = []
     @State private var reminders: [ReminderItem] = []
-    @Environment(\.openURL) private var openURL
 
     private let eventStore = EKEventStore()
 
@@ -165,7 +164,7 @@ struct ContentView: View {
         fetchReminders()
     }
 
-    private func fetchReminders() {
+    @MainActor private func fetchReminders() {
         guard let listID = selectedListID else { return }
 
         Task {
