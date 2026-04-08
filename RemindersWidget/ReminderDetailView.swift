@@ -26,6 +26,11 @@ struct ReminderDetailView: View {
             }
         }
         .onAppear { fetchReminders() }
+        .onChange(of: listID) { _, _ in
+            reminders = []
+            completingIDs = []
+            fetchReminders()
+        }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
                 fetchReminders()
