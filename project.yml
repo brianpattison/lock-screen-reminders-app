@@ -14,6 +14,7 @@ targets:
     sources:
       - path: RemindersWidget
       - path: Assets.xcassets
+      - path: Shared
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.brianpattison.RemindersWidget
@@ -26,6 +27,7 @@ targets:
         INFOPLIST_KEY_NSRemindersFullAccessUsageDescription: "This app needs access to your reminders to display them in the Lock Screen widget."
         GENERATE_INFOPLIST_FILE: true
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: false
+        CODE_SIGN_ENTITLEMENTS: RemindersWidget/RemindersWidget.entitlements
     dependencies:
       - target: RemindersWidgetExtension
   RemindersWidgetExtension:
@@ -43,6 +45,7 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         INFOPLIST_KEY_CFBundleDisplayName: Lock Screen
         INFOPLIST_FILE: RemindersWidgetExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: RemindersWidgetExtension/RemindersWidgetExtension.entitlements
   RemindersWidgetTests:
     type: bundle.unit-test
     platform: iOS
