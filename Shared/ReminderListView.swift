@@ -10,17 +10,15 @@ struct ReminderListView: View {
         let textFont: Font = useSmallFont ? .caption : .body
         let circleSize: CGFloat = useSmallFont ? 10 : 13
         VStack(alignment: .leading, spacing: count >= 3 ? 2 : 6) {
-            ForEach(Array(reminders.enumerated()), id: \.offset) { _, reminder in
-                Link(destination: reminder.widgetURL) {
-                    HStack(spacing: 5) {
-                        Image(systemName: "circle")
-                            .font(.system(size: circleSize))
-                        Text(reminder.title)
-                            .font(textFont)
-                            .lineLimit(1)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            ForEach(reminders) { reminder in
+                HStack(spacing: 5) {
+                    Image(systemName: "circle")
+                        .font(.system(size: circleSize))
+                    Text(reminder.title)
+                        .font(textFont)
+                        .lineLimit(1)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

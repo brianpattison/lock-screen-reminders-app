@@ -6,38 +6,28 @@ struct ContentView: View {
     @State private var authStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .reminder)
     @State private var selectedListID: String?
     @State private var selectedListTitle: String?
-    @State private var availableLists: [(id: String, title: String)] = []
-    @State private var reminders: [ReminderItem] = []
+    @State private var selectedListColor: Color = .blue
+    @State private var availableLists: [(id: String, title: String, color: Color)] = []
+    @State private var showSettings = false
 
     private let eventStore = EKEventStore()
 
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-
-            Image(systemName: "checklist")
-                .font(.system(size: 64))
-                .foregroundStyle(.tint)
-
-            Text("Lock Screen Reminders")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-
-            Group {
-                switch authStatus {
-                case .fullAccess:
-                    mainView
-                case .denied, .restricted:
-                    deniedView
-                default:
-                    requestAccessView
-                }
+        Group {
+            if authStatus == .fullAccess, let listID = selectedListID, let listTitle = selectedListTitle {
+                ReminderDetailView(
+                    listID: listID,
+                    listTitle: listTitle,
+                    listColor: selectedListColor,
+                    eventStore: eventStore,
+                    showSettings: $showSettings
+                )
+            } else {
+                emptyState
             }
-            .multilineTextAlignment(.center)
-            .padding(.horizontal, 32)
-
-            Spacer()
-            Spacer()
+        }
+        .sheet(isPresented: $showSettings, onDismiss: loadSelectedList) {
+            settingsSheet
         }
         .onAppear {
             authStatus = EKEventStore.authorizationStatus(for: .reminder)
@@ -45,12 +35,84 @@ struct ContentView: View {
                 loadLists()
                 loadSelectedList()
             }
+            if selectedListID == nil || authStatus != .fullAccess {
+                showSettings = true
+            }
         }
     }
 
-    private var mainView: some View {
+    private var emptyState: some View {
+        VStack(spacing: 24) {
+            Spacer()
+            Image(systemName: "checklist")
+                .font(.system(size: 64))
+                .foregroundStyle(.tint)
+            Text("Lock Screen Reminders")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+            Text("Tap the gear icon or select a list to get started.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+            Spacer()
+            Spacer()
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showSettings = true
+                } label: {
+                    Image(systemName: "gearshape")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    // MARK: - Settings Sheet
+
+    private var settingsSheet: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                Spacer()
+
+                Image(systemName: "checklist")
+                    .font(.system(size: 64))
+                    .foregroundStyle(.tint)
+
+                Text("Lock Screen Reminders")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+
+                Group {
+                    switch authStatus {
+                    case .fullAccess:
+                        settingsMainView
+                    case .denied, .restricted:
+                        deniedView
+                    default:
+                        requestAccessView
+                    }
+                }
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+
+                Spacer()
+                Spacer()
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        showSettings = false
+                    }
+                }
+            }
+        }
+    }
+
+    private var settingsMainView: some View {
         VStack(spacing: 20) {
-            // List picker
             VStack(alignment: .leading, spacing: 4) {
                 Text("WIDGET LIST")
                     .font(.caption)
@@ -58,11 +120,11 @@ struct ContentView: View {
 
                 Menu {
                     Button("Today") {
-                        selectList(id: SelectedListStore.todayID, title: "Today")
+                        selectList(id: SelectedListStore.todayID, title: "Today", color: .blue)
                     }
                     ForEach(availableLists, id: \.id) { list in
                         Button(list.title) {
-                            selectList(id: list.id, title: list.title)
+                            selectList(id: list.id, title: list.title, color: list.color)
                         }
                     }
                 } label: {
@@ -80,31 +142,6 @@ struct ContentView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Widget preview
-            if selectedListID != nil {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("WIDGET PREVIEW")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    if reminders.isEmpty {
-                        Text("No reminders")
-                            .font(.caption)
-                            .foregroundStyle(.white.opacity(0.6))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(16)
-                            .background(Color(white: 0.15), in: RoundedRectangle(cornerRadius: 16))
-                    } else {
-                        ReminderListView(reminders: reminders)
-                            .tint(.white)
-                            .padding(16)
-                            .background(Color(white: 0.15), in: RoundedRectangle(cornerRadius: 16))
-                    }
-                }
-                .frame(maxWidth: 200, alignment: .leading)
-            }
-
-            // Setup instructions
             Text("Long press your Lock Screen, tap **Customize**, then add the **Reminders** widget below the clock.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -112,7 +149,7 @@ struct ContentView: View {
     }
 
     private var deniedView: some View {
-        Text("Reminders access was denied. Go to **Settings → Privacy & Security → Reminders** and enable access for this app.")
+        Text("Reminders access was denied. Go to **Settings \u{2192} Privacy & Security \u{2192} Reminders** and enable access for this app.")
             .font(.subheadline)
             .foregroundStyle(.secondary)
     }
@@ -137,9 +174,11 @@ struct ContentView: View {
         }
     }
 
+    // MARK: - Data
+
     private func loadLists() {
         availableLists = eventStore.calendars(for: .reminder)
-            .map { (id: $0.calendarIdentifier, title: $0.title) }
+            .map { (id: $0.calendarIdentifier, title: $0.title, color: Color(cgColor: $0.cgColor)) }
             .sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
     }
 
@@ -150,14 +189,14 @@ struct ContentView: View {
         if let listID = selectedListID {
             if listID == SelectedListStore.todayID {
                 selectedListTitle = "Today"
-            } else {
-                selectedListTitle = availableLists.first(where: { $0.id == listID })?.title
-            }
-            if selectedListTitle != nil {
-                fetchReminders()
+                selectedListColor = .blue
+            } else if let list = availableLists.first(where: { $0.id == listID }) {
+                selectedListTitle = list.title
+                selectedListColor = list.color
             } else {
                 // Stored list no longer exists
                 selectedListID = nil
+                selectedListTitle = nil
                 var mutableStore = SelectedListStore()
                 mutableStore.selectedListID = nil
                 mutableStore.selectedListTitle = nil
@@ -166,69 +205,15 @@ struct ContentView: View {
         }
     }
 
-    private func selectList(id: String, title: String) {
+    private func selectList(id: String, title: String, color: Color) {
         selectedListID = id
         selectedListTitle = title
+        selectedListColor = color
 
         var store = SelectedListStore()
         store.selectedListID = id
         store.selectedListTitle = title
 
         WidgetCenter.shared.reloadAllTimelines()
-        fetchReminders()
-    }
-
-    @MainActor private func fetchReminders() {
-        guard let listID = selectedListID else { return }
-
-        Task {
-            let ekReminders: [EKReminder]
-
-            if listID == SelectedListStore.todayID {
-                let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
-                let predicate = eventStore.predicateForIncompleteReminders(
-                    withDueDateStarting: .distantPast,
-                    ending: endOfDay,
-                    calendars: nil
-                )
-                ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
-                    _ = eventStore.fetchReminders(matching: predicate) { reminders in
-                        continuation.resume(returning: reminders ?? [])
-                    }
-                }
-            } else {
-                let calendars = eventStore.calendars(for: .reminder)
-                guard let calendar = calendars.first(where: { $0.calendarIdentifier == listID }) else {
-                    reminders = []
-                    selectedListID = nil
-                    selectedListTitle = nil
-                    var store = SelectedListStore()
-                    store.selectedListID = nil
-                    store.selectedListTitle = nil
-                    return
-                }
-
-                let predicate = eventStore.predicateForReminders(in: [calendar])
-                ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
-                    _ = eventStore.fetchReminders(matching: predicate) { reminders in
-                        continuation.resume(returning: reminders ?? [])
-                    }
-                }
-            }
-
-            let items = ekReminders
-                .filter { !$0.isCompleted }
-                .map { reminder in
-                    ReminderItem(
-                        title: reminder.title ?? "",
-                        dueDate: reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) },
-                        creationDate: reminder.creationDate,
-                        externalID: reminder.calendarItemExternalIdentifier
-                    )
-                }
-
-            guard selectedListID == listID else { return }
-            reminders = Array(sortReminders(items).prefix(3))
-        }
     }
 }

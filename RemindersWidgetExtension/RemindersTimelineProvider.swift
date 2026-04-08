@@ -8,9 +8,9 @@ struct RemindersTimelineProvider: TimelineProvider {
         ReminderEntry(
             date: Date(),
             reminders: [
-                ReminderItem(title: "Reminder 1", dueDate: nil, creationDate: nil, externalID: nil),
-                ReminderItem(title: "Reminder 2", dueDate: nil, creationDate: nil, externalID: nil),
-                ReminderItem(title: "Reminder 3", dueDate: nil, creationDate: nil, externalID: nil),
+                ReminderItem(title: "Reminder 1", dueDate: nil, creationDate: nil),
+                ReminderItem(title: "Reminder 2", dueDate: nil, creationDate: nil),
+                ReminderItem(title: "Reminder 3", dueDate: nil, creationDate: nil),
             ],
             state: .configured
         )
@@ -80,8 +80,7 @@ struct RemindersTimelineProvider: TimelineProvider {
                 ReminderItem(
                     title: reminder.title ?? "",
                     dueDate: reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) },
-                    creationDate: reminder.creationDate,
-                    externalID: reminder.calendarItemExternalIdentifier
+                    creationDate: reminder.creationDate
                 )
             }
 

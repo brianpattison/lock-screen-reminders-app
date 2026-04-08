@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2177894E5882791340E8C8EE /* RemindersTimelineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC6C1A566ADA0238F892085 /* RemindersTimelineProvider.swift */; };
+		31C712936EE7E2A3D8D1E855 /* ReminderDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18CDCF5343E43D3B5D646B79 /* ReminderDetailView.swift */; };
 		33F42AEBE1AC5F7E93F0320A /* ReminderItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C7264B25C92FC2EB631428B /* ReminderItem.swift */; };
 		36D50988132C8F651EAB99F6 /* ReminderItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C7264B25C92FC2EB631428B /* ReminderItem.swift */; };
 		4033DAC8371499761217F6F6 /* ReminderListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13ADDE3707989BFC52BF5E0 /* ReminderListView.swift */; };
@@ -62,6 +63,7 @@
 
 /* Begin PBXFileReference section */
 		0AC6C1A566ADA0238F892085 /* RemindersTimelineProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersTimelineProvider.swift; sourceTree = "<group>"; };
+		18CDCF5343E43D3B5D646B79 /* ReminderDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderDetailView.swift; sourceTree = "<group>"; };
 		22832FF3498365ADB9BCED95 /* SelectedListStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedListStoreTests.swift; sourceTree = "<group>"; };
 		259C647ACA8E985925B05F1D /* RemindersWidgetTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RemindersWidgetTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D51594DB2D095395C70D57D /* RemindersWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersWidgetBundle.swift; sourceTree = "<group>"; };
@@ -117,6 +119,7 @@
 			isa = PBXGroup;
 			children = (
 				ACA8AC5DBEC6EC0E0A7CB05C /* ContentView.swift */,
+				18CDCF5343E43D3B5D646B79 /* ReminderDetailView.swift */,
 				5F252BC69F06EEAD565FF4F3 /* RemindersWidget.entitlements */,
 				7C0938BCB77EAD48E521E9EB /* RemindersWidgetApp.swift */,
 			);
@@ -277,6 +280,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C236F250EFBBE448852B1B95 /* ContentView.swift in Sources */,
+				31C712936EE7E2A3D8D1E855 /* ReminderDetailView.swift in Sources */,
 				AA02851BA251553E225B6FF5 /* ReminderItem.swift in Sources */,
 				5F2073C1217866CFBF47681D /* ReminderListView.swift in Sources */,
 				A25FDACB1F2ADE94462B62D6 /* RemindersWidgetApp.swift in Sources */,
