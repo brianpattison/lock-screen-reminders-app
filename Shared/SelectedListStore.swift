@@ -10,7 +10,14 @@ struct SelectedListStore {
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults? = nil) {
-        self.defaults = defaults ?? UserDefaults(suiteName: Self.suiteName) ?? .standard
+        if let defaults {
+            self.defaults = defaults
+        } else if let shared = UserDefaults(suiteName: Self.suiteName) {
+            self.defaults = shared
+        } else {
+            assertionFailure("Failed to create UserDefaults for App Group suite: \(Self.suiteName)")
+            self.defaults = .standard
+        }
     }
 
     var selectedListID: String? {
