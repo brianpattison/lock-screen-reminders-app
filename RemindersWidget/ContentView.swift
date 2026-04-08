@@ -90,17 +90,18 @@ struct ContentView: View {
                     if reminders.isEmpty {
                         Text("No reminders")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.white.opacity(0.6))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(16)
-                            .background(.fill.tertiary, in: RoundedRectangle(cornerRadius: 16))
+                            .background(Color(white: 0.15), in: RoundedRectangle(cornerRadius: 16))
                     } else {
                         ReminderListView(reminders: reminders)
+                            .tint(.white)
                             .padding(16)
-                            .background(.fill.tertiary, in: RoundedRectangle(cornerRadius: 16))
+                            .background(Color(white: 0.15), in: RoundedRectangle(cornerRadius: 16))
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: 200, alignment: .leading)
             }
 
             // Setup instructions
