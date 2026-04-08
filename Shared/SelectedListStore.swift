@@ -7,7 +7,7 @@ struct SelectedListStore {
     private static let listIDKey = "selectedListID"
     private static let listTitleKey = "selectedListTitle"
 
-    private let defaults: UserDefaults
+    private let defaults: UserDefaults?
 
     init(defaults: UserDefaults? = nil) {
         if let defaults {
@@ -16,17 +16,17 @@ struct SelectedListStore {
             self.defaults = shared
         } else {
             assertionFailure("Failed to create UserDefaults for App Group suite: \(Self.suiteName)")
-            self.defaults = .standard
+            self.defaults = nil
         }
     }
 
     var selectedListID: String? {
-        get { defaults.string(forKey: Self.listIDKey) }
-        set { defaults.set(newValue, forKey: Self.listIDKey) }
+        get { defaults?.string(forKey: Self.listIDKey) }
+        set { defaults?.set(newValue, forKey: Self.listIDKey) }
     }
 
     var selectedListTitle: String? {
-        get { defaults.string(forKey: Self.listTitleKey) }
-        set { defaults.set(newValue, forKey: Self.listTitleKey) }
+        get { defaults?.string(forKey: Self.listTitleKey) }
+        set { defaults?.set(newValue, forKey: Self.listTitleKey) }
     }
 }
