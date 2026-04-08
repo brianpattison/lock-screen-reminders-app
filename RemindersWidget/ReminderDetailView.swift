@@ -11,6 +11,7 @@ struct ReminderDetailView: View {
 
     @State private var reminders: [ReminderItem] = []
     @State private var completingIDs: Set<String> = []
+    @State private var fetchTask: Task<Void, Never>?
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -110,7 +111,8 @@ struct ReminderDetailView: View {
     }
 
     @MainActor private func fetchReminders() {
-        Task {
+        fetchTask?.cancel()
+        fetchTask = Task {
             let ekReminders: [EKReminder]
 
             if listID == SelectedListStore.todayID {
@@ -151,6 +153,7 @@ struct ReminderDetailView: View {
                     )
                 }
 
+            guard !Task.isCancelled else { return }
             reminders = sortReminders(items)
         }
     }
