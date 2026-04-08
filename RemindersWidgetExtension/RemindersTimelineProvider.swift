@@ -1,7 +1,7 @@
 import WidgetKit
 import EventKit
 
-struct RemindersTimelineProvider: AppIntentTimelineProvider {
+struct RemindersTimelineProvider: TimelineProvider {
     private let store = EKEventStore()
 
     func placeholder(in context: Context) -> ReminderEntry {
@@ -16,32 +16,39 @@ struct RemindersTimelineProvider: AppIntentTimelineProvider {
         )
     }
 
-    func snapshot(for configuration: SelectListIntent, in context: Context) async -> ReminderEntry {
+    func getSnapshot(in context: Context, completion: @escaping (ReminderEntry) -> Void) {
         if context.isPreview {
-            return placeholder(in: context)
+            completion(placeholder(in: context))
+            return
         }
-        return await fetchEntry(for: configuration)
+        Task {
+            let entry = await fetchEntry()
+            completion(entry)
+        }
     }
 
-    func timeline(for configuration: SelectListIntent, in context: Context) async -> Timeline<ReminderEntry> {
-        let entry = await fetchEntry(for: configuration)
-        let refreshDate = Date().addingTimeInterval(15 * 60)
-        return Timeline(entries: [entry], policy: .after(refreshDate))
+    func getTimeline(in context: Context, completion: @escaping (Timeline<ReminderEntry>) -> Void) {
+        Task {
+            let entry = await fetchEntry()
+            let refreshDate = Date().addingTimeInterval(15 * 60)
+            completion(Timeline(entries: [entry], policy: .after(refreshDate)))
+        }
     }
 
-    private func fetchEntry(for configuration: SelectListIntent) async -> ReminderEntry {
+    private func fetchEntry() async -> ReminderEntry {
         let status = EKEventStore.authorizationStatus(for: .reminder)
         guard status == .fullAccess else {
             return ReminderEntry(date: Date(), reminders: [], state: .noAccess)
         }
 
-        guard let listEntity = configuration.reminderList else {
+        let listStore = SelectedListStore()
+        guard let listID = listStore.selectedListID else {
             return ReminderEntry(date: Date(), reminders: [], state: .notConfigured)
         }
 
         let ekReminders: [EKReminder]
 
-        if listEntity.isToday {
+        if listID == SelectedListStore.todayID {
             let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
             let predicate = store.predicateForIncompleteReminders(
                 withDueDateStarting: .distantPast,
@@ -55,7 +62,7 @@ struct RemindersTimelineProvider: AppIntentTimelineProvider {
             }
         } else {
             let calendars = store.calendars(for: .reminder)
-            guard let calendar = calendars.first(where: { $0.calendarIdentifier == listEntity.id }) else {
+            guard let calendar = calendars.first(where: { $0.calendarIdentifier == listID }) else {
                 return ReminderEntry(date: Date(), reminders: [], state: .notConfigured)
             }
 

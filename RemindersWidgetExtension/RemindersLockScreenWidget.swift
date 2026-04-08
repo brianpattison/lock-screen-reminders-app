@@ -5,9 +5,8 @@ struct RemindersLockScreenWidget: Widget {
     let kind = "RemindersLockScreenWidget"
 
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(
+        StaticConfiguration(
             kind: kind,
-            intent: SelectListIntent.self,
             provider: RemindersTimelineProvider()
         ) { entry in
             RemindersWidgetView(entry: entry)
