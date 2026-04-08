@@ -109,7 +109,7 @@ struct ReminderDetailView: View {
         }
     }
 
-    private func fetchReminders() {
+    @MainActor private func fetchReminders() {
         Task {
             let ekReminders: [EKReminder]
 
