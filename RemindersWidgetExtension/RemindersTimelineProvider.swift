@@ -80,7 +80,8 @@ struct RemindersTimelineProvider: TimelineProvider {
                 ReminderItem(
                     title: reminder.title ?? "",
                     dueDate: reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) },
-                    creationDate: reminder.creationDate
+                    creationDate: reminder.creationDate,
+                    calendarItemIdentifier: reminder.calendarItemIdentifier
                 )
             }
 
