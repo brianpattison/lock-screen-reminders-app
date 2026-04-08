@@ -50,7 +50,7 @@ struct ContentView: View {
             Text("Lock Screen Reminders")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            Text("Tap the gear icon or select a list to get started.")
+            Text("Tap the gear icon to open settings and get started.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
