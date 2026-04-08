@@ -145,10 +145,19 @@ struct ContentView: View {
     private func loadSelectedList() {
         let store = SelectedListStore()
         selectedListID = store.selectedListID
-        selectedListTitle = store.selectedListTitle
 
-        if selectedListID != nil {
-            fetchReminders()
+        if let listID = selectedListID {
+            if listID == SelectedListStore.todayID {
+                selectedListTitle = "Today"
+            } else {
+                selectedListTitle = availableLists.first(where: { $0.id == listID })?.title
+            }
+            if selectedListTitle != nil {
+                fetchReminders()
+            } else {
+                // Stored list no longer exists
+                selectedListID = nil
+            }
         }
     }
 
