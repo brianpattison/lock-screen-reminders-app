@@ -157,6 +157,10 @@ struct ContentView: View {
             } else {
                 // Stored list no longer exists
                 selectedListID = nil
+                var mutableStore = SelectedListStore()
+                mutableStore.selectedListID = nil
+                mutableStore.selectedListTitle = nil
+                WidgetCenter.shared.reloadAllTimelines()
             }
         }
     }
