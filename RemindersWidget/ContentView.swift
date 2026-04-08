@@ -186,6 +186,11 @@ struct ContentView: View {
                 let calendars = eventStore.calendars(for: .reminder)
                 guard let calendar = calendars.first(where: { $0.calendarIdentifier == listID }) else {
                     reminders = []
+                    selectedListID = nil
+                    selectedListTitle = nil
+                    var store = SelectedListStore()
+                    store.selectedListID = nil
+                    store.selectedListTitle = nil
                     return
                 }
 
