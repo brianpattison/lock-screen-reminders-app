@@ -208,6 +208,7 @@ struct ContentView: View {
                     )
                 }
 
+            guard selectedListID == listID else { return }
             reminders = Array(sortReminders(items).prefix(3))
         }
     }
