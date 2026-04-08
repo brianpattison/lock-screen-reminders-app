@@ -88,7 +88,13 @@ struct ReminderDetailView: View {
     private func completeReminder(_ reminder: ReminderItem) {
         guard let ekReminder = eventStore.calendarItem(withIdentifier: reminder.id) as? EKReminder else { return }
         ekReminder.isCompleted = true
-        try? eventStore.save(ekReminder, commit: true)
+
+        do {
+            try eventStore.save(ekReminder, commit: true)
+        } catch {
+            ekReminder.isCompleted = false
+            return
+        }
 
         _ = withAnimation(.easeOut(duration: 0.4).delay(0.5)) {
             completingIDs.insert(reminder.id)
