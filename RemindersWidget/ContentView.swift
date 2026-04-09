@@ -202,6 +202,7 @@ struct ContentView: View {
                 // Stored list no longer exists
                 selectedListID = nil
                 selectedListTitle = nil
+                selectedListColor = nil
                 var mutableStore = SelectedListStore()
                 mutableStore.selectedListID = nil
                 mutableStore.selectedListTitle = nil
