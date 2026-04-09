@@ -45,14 +45,71 @@
     <section class="screenshots">
       <h2>Screenshots</h2>
       <div class="screenshot-grid">
-        <a href="screenshot-lock-screen.png" class="screenshot-link">
-          <img src="screenshot-lock-screen-thumb.png" alt="Lock Screen with Reminders Widget showing grocery list items" class="screenshot-img">
-        </a>
-        <a href="screenshot-list-selection.png" class="screenshot-link">
-          <img src="screenshot-list-selection-thumb.png" alt="Widget configuration screen with Grocery Store list selected" class="screenshot-img">
-        </a>
+        <button class="screenshot-link" data-index="0">
+          <img src="screenshot-lock-screen-thumb.png" alt="Lock Screen with Reminders Widget showing three reminders" class="screenshot-img">
+        </button>
+        <button class="screenshot-link" data-index="1">
+          <img src="screenshot-list-view-thumb.png" alt="App list view showing reminders from a selected list" class="screenshot-img">
+        </button>
+        <button class="screenshot-link" data-index="2">
+          <img src="screenshot-list-selection-thumb.png" alt="Widget configuration screen for choosing a Reminders list" class="screenshot-img">
+        </button>
       </div>
     </section>
+
+    <div class="gallery-overlay" id="gallery" aria-hidden="true">
+      <button class="gallery-close" aria-label="Close gallery">&times;</button>
+      <button class="gallery-arrow gallery-prev" aria-label="Previous screenshot">&#8249;</button>
+      <img class="gallery-image" id="gallery-img" src="" alt="">
+      <button class="gallery-arrow gallery-next" aria-label="Next screenshot">&#8250;</button>
+    </div>
+
+    <script>
+      (function () {
+        var images = [
+          { src: 'screenshot-lock-screen-6.5.png', alt: 'Lock Screen with Reminders Widget showing three reminders' },
+          { src: 'screenshot-list-view-6.5.png', alt: 'App list view showing reminders from a selected list' },
+          { src: 'screenshot-list-selection-6.5.png', alt: 'Widget configuration screen for choosing a Reminders list' }
+        ];
+        var overlay = document.getElementById('gallery');
+        var img = document.getElementById('gallery-img');
+        var current = 0;
+
+        function show(index) {
+          current = (index + images.length) % images.length;
+          img.src = images[current].src;
+          img.alt = images[current].alt;
+          overlay.setAttribute('aria-hidden', 'false');
+          overlay.classList.add('active');
+        }
+
+        function hide() {
+          overlay.classList.remove('active');
+          overlay.setAttribute('aria-hidden', 'true');
+        }
+
+        document.querySelectorAll('.screenshot-link').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            show(parseInt(this.dataset.index, 10));
+          });
+        });
+
+        overlay.querySelector('.gallery-close').addEventListener('click', hide);
+        overlay.querySelector('.gallery-prev').addEventListener('click', function () { show(current - 1); });
+        overlay.querySelector('.gallery-next').addEventListener('click', function () { show(current + 1); });
+
+        overlay.addEventListener('click', function (e) {
+          if (e.target === overlay) hide();
+        });
+
+        document.addEventListener('keydown', function (e) {
+          if (!overlay.classList.contains('active')) return;
+          if (e.key === 'Escape') hide();
+          else if (e.key === 'ArrowLeft') show(current - 1);
+          else if (e.key === 'ArrowRight') show(current + 1);
+        });
+      })();
+    </script>
   </main>
 
   <footer>
