@@ -35,9 +35,8 @@ Replace the current "redirect to Apple Reminders" behavior with an in-app list v
 
 ### 4. Widget Tap Behavior
 
-- Entire widget is one tap area (remove individual `Link` per reminder)
-- Tap opens the app to the list view (no redirect to Apple Reminders)
-- `widgetURL` stays as `reminderswidget://open`
+- Entire widget is one tap area (remove individual `Link` per reminder and `widgetURL`)
+- Tap opens the app to the list view (default WidgetKit behavior opens the host app)
 
 ### 5. Model Changes
 
