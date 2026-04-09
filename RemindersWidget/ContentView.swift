@@ -42,31 +42,36 @@ struct ContentView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 0) {
+            HStack {
+                Spacer()
+                Button {
+                    showSettings = true
+                } label: {
+                    Image(systemName: "gearshape")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+
             Spacer()
             Image(systemName: "checklist")
                 .font(.system(size: 64))
                 .foregroundStyle(.tint)
+                .padding(.bottom, 24)
             Text("Lock Screen Reminders")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            Text("Tap the gear icon to open settings and get started.")
+                .padding(.bottom, 24)
+            Text("Tap the gear icon to get started.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Spacer()
             Spacer()
-        }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showSettings = true
-                } label: {
-                    Image(systemName: "gearshape")
-                        .foregroundStyle(.secondary)
-                }
-            }
         }
     }
 
