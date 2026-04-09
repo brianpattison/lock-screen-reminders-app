@@ -6,7 +6,7 @@ struct ContentView: View {
     @State private var authStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .reminder)
     @State private var selectedListID: String?
     @State private var selectedListTitle: String?
-    @State private var selectedListColor: Color = .blue
+    @State private var selectedListColor: Color?
     @State private var availableLists: [(id: String, title: String, color: Color)] = []
     @State private var showSettings = false
 
@@ -14,11 +14,11 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if authStatus == .fullAccess, let listID = selectedListID, let listTitle = selectedListTitle {
+            if authStatus == .fullAccess, let listID = selectedListID, let listTitle = selectedListTitle, let listColor = selectedListColor {
                 ReminderDetailView(
                     listID: listID,
                     listTitle: listTitle,
-                    listColor: selectedListColor,
+                    listColor: listColor,
                     eventStore: eventStore,
                     showSettings: $showSettings
                 )
