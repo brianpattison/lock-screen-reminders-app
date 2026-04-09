@@ -100,12 +100,11 @@ struct ReminderDetailView: View {
 
         completingIDs.insert(reminder.id)
 
-        _ = withAnimation(.easeOut(duration: 0.4).delay(0.5)) {
-            reminders.removeAll { $0.id == reminder.id }
-            completingIDs.remove(reminder.id)
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            withAnimation(.easeOut(duration: 0.4)) {
+                reminders.removeAll { $0.id == reminder.id }
+                completingIDs.remove(reminder.id)
+            }
             WidgetCenter.shared.reloadAllTimelines()
         }
     }
