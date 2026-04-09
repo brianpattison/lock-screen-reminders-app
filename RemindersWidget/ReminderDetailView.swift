@@ -133,7 +133,11 @@ struct ReminderDetailView: View {
                     return
                 }
 
-                let predicate = eventStore.predicateForReminders(in: [calendar])
+                let predicate = eventStore.predicateForIncompleteReminders(
+                    withDueDateStarting: nil,
+                    ending: nil,
+                    calendars: [calendar]
+                )
                 ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
                     _ = eventStore.fetchReminders(matching: predicate) { reminders in
                         continuation.resume(returning: reminders ?? [])
@@ -142,7 +146,6 @@ struct ReminderDetailView: View {
             }
 
             let items = ekReminders
-                .filter { !$0.isCompleted }
                 .map { reminder in
                     ReminderItem(
                         title: reminder.title ?? "",
