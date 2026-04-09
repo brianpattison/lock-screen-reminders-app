@@ -10,6 +10,7 @@ struct ContentView: View {
     @State private var availableLists: [(id: String, title: String, color: Color)] = []
     @State private var showSettings = false
     @State private var previewReminders: [ReminderItem] = []
+    @State private var previewFetchTask: Task<Void, Never>?
 
     private let eventStore = EKEventStore()
 
@@ -249,9 +250,11 @@ struct ContentView: View {
     }
 
     @MainActor private func fetchPreviewReminders() {
+        previewFetchTask?.cancel()
         guard let listID = selectedListID else { return }
+        previewReminders = []
 
-        Task {
+        previewFetchTask = Task {
             let ekReminders: [EKReminder]
 
             if listID == SelectedListStore.todayID {
@@ -290,11 +293,12 @@ struct ContentView: View {
                     ReminderItem(
                         title: reminder.title ?? "",
                         dueDate: reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) },
-                        creationDate: reminder.creationDate
+                        creationDate: reminder.creationDate,
+                        calendarItemIdentifier: reminder.calendarItemIdentifier
                     )
                 }
 
-            guard selectedListID == listID else { return }
+            guard !Task.isCancelled, selectedListID == listID else { return }
             previewReminders = Array(sortReminders(items).prefix(3))
         }
     }
