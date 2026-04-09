@@ -162,7 +162,7 @@ struct ContentView: View {
                             .background(Color(white: 0.15), in: RoundedRectangle(cornerRadius: 16))
                     } else {
                         ReminderListView(reminders: previewReminders)
-                            .tint(.white)
+                            .foregroundStyle(.white)
                             .padding(16)
                             .background(Color(white: 0.15), in: RoundedRectangle(cornerRadius: 16))
                     }
