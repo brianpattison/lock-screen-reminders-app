@@ -82,9 +82,7 @@ struct ContentView: View {
             VStack(spacing: 24) {
                 Spacer()
 
-                Image(systemName: "checklist")
-                    .font(.system(size: 64))
-                    .foregroundStyle(.tint)
+                ReminderListIcon()
 
                 Text("Lock Screen Reminders")
                     .font(.largeTitle)
