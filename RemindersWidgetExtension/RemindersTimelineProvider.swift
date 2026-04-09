@@ -8,9 +8,9 @@ struct RemindersTimelineProvider: TimelineProvider {
         ReminderEntry(
             date: Date(),
             reminders: [
-                ReminderItem(title: "Reminder 1", dueDate: nil, creationDate: nil, externalID: nil),
-                ReminderItem(title: "Reminder 2", dueDate: nil, creationDate: nil, externalID: nil),
-                ReminderItem(title: "Reminder 3", dueDate: nil, creationDate: nil, externalID: nil),
+                ReminderItem(title: "Reminder 1", dueDate: nil, creationDate: nil),
+                ReminderItem(title: "Reminder 2", dueDate: nil, creationDate: nil),
+                ReminderItem(title: "Reminder 3", dueDate: nil, creationDate: nil),
             ],
             state: .configured
         )
@@ -66,7 +66,11 @@ struct RemindersTimelineProvider: TimelineProvider {
                 return ReminderEntry(date: Date(), reminders: [], state: .notConfigured)
             }
 
-            let predicate = store.predicateForReminders(in: [calendar])
+            let predicate = store.predicateForIncompleteReminders(
+                withDueDateStarting: nil,
+                ending: nil,
+                calendars: [calendar]
+            )
             ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
                 _ = store.fetchReminders(matching: predicate) { reminders in
                     continuation.resume(returning: reminders ?? [])
@@ -75,13 +79,12 @@ struct RemindersTimelineProvider: TimelineProvider {
         }
 
         let items = ekReminders
-            .filter { !$0.isCompleted }
             .map { reminder in
                 ReminderItem(
                     title: reminder.title ?? "",
                     dueDate: reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) },
                     creationDate: reminder.creationDate,
-                    externalID: reminder.calendarItemExternalIdentifier
+                    calendarItemIdentifier: reminder.calendarItemIdentifier
                 )
             }
 

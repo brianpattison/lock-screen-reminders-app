@@ -1,17 +1,16 @@
 import Foundation
 
-struct ReminderItem {
+struct ReminderItem: Identifiable {
+    let id: String
     let title: String
     let dueDate: Date?
     let creationDate: Date?
-    let externalID: String?
 
-    var widgetURL: URL {
-        if let externalID,
-           let encoded = externalID.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-            return URL(string: "reminderswidget://open?reminder=\(encoded)")!
-        }
-        return URL(string: "reminderswidget://open")!
+    init(title: String, dueDate: Date?, creationDate: Date?, calendarItemIdentifier: String? = nil) {
+        self.id = calendarItemIdentifier ?? UUID().uuidString
+        self.title = title
+        self.dueDate = dueDate
+        self.creationDate = creationDate
     }
 }
 
