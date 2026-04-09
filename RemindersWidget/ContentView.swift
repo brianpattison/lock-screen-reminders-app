@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var selectedListColor: Color?
     @State private var availableLists: [(id: String, title: String, color: Color)] = []
     @State private var showSettings = false
+    @State private var previewReminders: [ReminderItem] = []
 
     private let eventStore = EKEventStore()
 
@@ -145,6 +146,29 @@ struct ContentView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
+            if selectedListID != nil {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("WIDGET PREVIEW")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    if previewReminders.isEmpty {
+                        Text("No reminders")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.6))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(16)
+                            .background(Color(white: 0.15), in: RoundedRectangle(cornerRadius: 16))
+                    } else {
+                        ReminderListView(reminders: previewReminders)
+                            .tint(.white)
+                            .padding(16)
+                            .background(Color(white: 0.15), in: RoundedRectangle(cornerRadius: 16))
+                    }
+                }
+                .frame(maxWidth: 200, alignment: .leading)
+            }
+
             Text("Long press your Lock Screen, tap **Customize**, then add the **Reminders** widget below the clock.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -193,9 +217,11 @@ struct ContentView: View {
             if listID == SelectedListStore.todayID {
                 selectedListTitle = "Today"
                 selectedListColor = .blue
+                fetchPreviewReminders()
             } else if let list = availableLists.first(where: { $0.id == listID }) {
                 selectedListTitle = list.title
                 selectedListColor = list.color
+                fetchPreviewReminders()
             } else {
                 // Stored list no longer exists
                 selectedListID = nil
@@ -219,5 +245,57 @@ struct ContentView: View {
         store.selectedListTitle = title
 
         WidgetCenter.shared.reloadAllTimelines()
+        fetchPreviewReminders()
+    }
+
+    @MainActor private func fetchPreviewReminders() {
+        guard let listID = selectedListID else { return }
+
+        Task {
+            let ekReminders: [EKReminder]
+
+            if listID == SelectedListStore.todayID {
+                let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
+                let predicate = eventStore.predicateForIncompleteReminders(
+                    withDueDateStarting: .distantPast,
+                    ending: endOfDay,
+                    calendars: nil
+                )
+                ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
+                    _ = eventStore.fetchReminders(matching: predicate) { reminders in
+                        continuation.resume(returning: reminders ?? [])
+                    }
+                }
+            } else {
+                let calendars = eventStore.calendars(for: .reminder)
+                guard let calendar = calendars.first(where: { $0.calendarIdentifier == listID }) else {
+                    previewReminders = []
+                    return
+                }
+
+                let predicate = eventStore.predicateForIncompleteReminders(
+                    withDueDateStarting: nil,
+                    ending: nil,
+                    calendars: [calendar]
+                )
+                ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
+                    _ = eventStore.fetchReminders(matching: predicate) { reminders in
+                        continuation.resume(returning: reminders ?? [])
+                    }
+                }
+            }
+
+            let items = ekReminders
+                .map { reminder in
+                    ReminderItem(
+                        title: reminder.title ?? "",
+                        dueDate: reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) },
+                        creationDate: reminder.creationDate
+                    )
+                }
+
+            guard selectedListID == listID else { return }
+            previewReminders = Array(sortReminders(items).prefix(3))
+        }
     }
 }
