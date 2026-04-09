@@ -54,6 +54,13 @@ struct ReminderDetailView: View {
                     .font(.title2)
                     .foregroundStyle(.secondary)
             }
+            Button {
+                openRemindersApp()
+            } label: {
+                Image(systemName: "arrow.up.forward.app")
+                    .font(.title2)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding(.horizontal, 20)
         .padding(.top, 16)
@@ -66,6 +73,18 @@ struct ReminderDetailView: View {
                 ForEach(reminders) { reminder in
                     reminderRow(reminder)
                         .transition(.opacity.combined(with: .move(edge: .leading)))
+                }
+            }
+            Section {
+                Button {
+                    openRemindersApp()
+                } label: {
+                    HStack {
+                        Text("Open in Reminders")
+                        Spacer()
+                        Image(systemName: "arrow.up.forward.app")
+                    }
+                    .foregroundStyle(.secondary)
                 }
             }
         }
@@ -108,6 +127,12 @@ struct ReminderDetailView: View {
                 completingIDs.remove(reminder.id)
             }
             WidgetCenter.shared.reloadAllTimelines()
+        }
+    }
+
+    private func openRemindersApp() {
+        if let url = URL(string: "x-apple-reminderkit://") {
+            UIApplication.shared.open(url)
         }
     }
 
