@@ -159,12 +159,12 @@ struct ContentView: View {
                             .foregroundStyle(.white.opacity(0.6))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(16)
-                            .background(Color(white: 0.15), in: RoundedRectangle(cornerRadius: 16))
+                            .background(Color(white: 0.25), in: RoundedRectangle(cornerRadius: 16))
                     } else {
                         ReminderListView(reminders: previewReminders)
                             .foregroundStyle(.white)
                             .padding(16)
-                            .background(Color(white: 0.15), in: RoundedRectangle(cornerRadius: 16))
+                            .background(Color(white: 0.25), in: RoundedRectangle(cornerRadius: 16))
                     }
                 }
                 .frame(maxWidth: 200, alignment: .leading)
@@ -173,6 +173,7 @@ struct ContentView: View {
             Text("Long press your Lock Screen, tap **Customize**, then add the **Reminders** widget below the clock.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
