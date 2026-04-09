@@ -6,7 +6,7 @@ struct ReminderListIcon: View {
     private var iconColor: Color {
         colorScheme == .dark
             ? Color(red: 225 / 255, green: 175 / 255, blue: 68 / 255)
-            : Color(red: 170 / 255, green: 125 / 255, blue: 20 / 255)
+            : Color(red: 16 / 255, green: 34 / 255, blue: 66 / 255)
     }
 
     var body: some View {
