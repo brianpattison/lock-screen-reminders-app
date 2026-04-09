@@ -175,6 +175,7 @@ struct ContentView: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .onAppear { fetchPreviewReminders() }
     }
 
     private var deniedView: some View {
