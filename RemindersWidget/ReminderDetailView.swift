@@ -80,7 +80,7 @@ struct ReminderDetailView: View {
                     openRemindersApp()
                 } label: {
                     HStack {
-                        Text("Open in Reminders")
+                        Text("Open Reminders")
                         Spacer()
                         Image(systemName: "arrow.up.forward.app")
                     }
