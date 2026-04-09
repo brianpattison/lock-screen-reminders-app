@@ -11,7 +11,6 @@ struct RemindersLockScreenWidget: Widget {
         ) { entry in
             RemindersWidgetView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
-                .widgetURL(URL(string: "reminderswidget://open")!)
         }
         .configurationDisplayName("Reminders")
         .description("Display reminders from a chosen list.")
