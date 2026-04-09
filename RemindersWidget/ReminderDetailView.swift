@@ -42,7 +42,7 @@ struct ReminderDetailView: View {
 
     private var header: some View {
         HStack {
-            Text(listTitle)
+            Text("Lock Screen Reminders")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundStyle(listColor)
@@ -62,9 +62,11 @@ struct ReminderDetailView: View {
 
     private var reminderList: some View {
         List {
-            ForEach(reminders) { reminder in
-                reminderRow(reminder)
-                    .transition(.opacity.combined(with: .move(edge: .leading)))
+            Section(listTitle) {
+                ForEach(reminders) { reminder in
+                    reminderRow(reminder)
+                        .transition(.opacity.combined(with: .move(edge: .leading)))
+                }
             }
         }
         .listStyle(.plain)
