@@ -222,9 +222,23 @@ struct ReminderDetailView: View {
                     now: now
                 )
             } else {
+                // Currently-incomplete reminders without a creationDate (rare EventKit case)
+                // fall back to start-of-today: visible to today's qualification check (since
+                // `creationDate < now` holds for any non-midnight `now`), but invisible at the
+                // end of any prior day (`creationDate < end_of_past_day` is false), so they
+                // don't retroactively credit or break a backfilled day.
+                // Completed reminders almost always supply completionDate as the fallback;
+                // `.distantFuture` is only the safety-net for the (creation == nil &&
+                // completion == nil) corrupt case, which would never happen for a completed
+                // reminder anyway.
+                let startOfToday = Calendar.current.startOfDay(for: now)
                 let history = StreakHistory(
-                    reminders: result.incompleteReminders.map(\.streakHistoryReminder)
-                        + result.completedReminders.map(\.streakHistoryReminder)
+                    reminders: result.incompleteReminders.map {
+                        $0.streakHistoryReminder(creationDateFallback: startOfToday)
+                    }
+                        + result.completedReminders.map {
+                            $0.streakHistoryReminder(creationDateFallback: .distantFuture)
+                        }
                 )
                 evaluation = StreakEngine().evaluate(
                     state: storedState,

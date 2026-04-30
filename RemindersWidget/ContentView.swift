@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var streakState: StreakState = .empty
     @State private var pendingStreakChange: PendingStreakChange?
     @State private var showStreakResetConfirmation = false
+    @Environment(\.scenePhase) private var scenePhase
 
     private let eventStore = EKEventStore()
 
@@ -54,6 +55,18 @@ struct ContentView: View {
             }
             if selectedListID == nil || authStatus != .fullAccess {
                 showSettings = true
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            // The user can grant Reminders access from system Settings while we're backgrounded.
+            // Re-read auth status and reload list state on return so the denied/request UI
+            // doesn't stay stuck until the next app launch.
+            guard newPhase == .active else { return }
+            authStatus = EKEventStore.authorizationStatus(for: .reminder)
+            loadStreakState()
+            if authStatus == .fullAccess {
+                loadLists()
+                loadSelectedList()
             }
         }
     }
