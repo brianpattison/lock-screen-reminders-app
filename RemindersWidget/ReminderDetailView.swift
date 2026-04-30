@@ -110,11 +110,16 @@ struct ReminderDetailView: View {
 
         switch streakState.mode {
         case .noOverdue:
-            return "Clear overdue reminders to keep the streak."
+            // Today already implies "due today or overdue", so "all overdue" reads as redundant
+            // there. Phrase it the same as Empty List for the Today list.
+            if listID == SelectedListStore.todayID {
+                return "Complete all reminders today."
+            }
+            return "Complete all overdue reminders."
         case .dailyProgress:
-            return "Complete a reminder to keep the streak."
+            return "Complete a reminder today."
         case .emptyList:
-            return "Finish everything to keep the streak."
+            return "Complete all reminders today."
         }
     }
 
