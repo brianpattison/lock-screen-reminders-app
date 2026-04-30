@@ -18,9 +18,9 @@ extension EKReminder {
         )
     }
 
-    var streakHistoryReminder: StreakHistoryReminder {
+    func streakHistoryReminder(creationDateFallback fallbackDate: Date = Date()) -> StreakHistoryReminder {
         StreakHistoryReminder(
-            creationDate: creationDate ?? .distantPast,
+            creationDate: creationDate ?? completionDate ?? fallbackDate,
             completionDate: completionDate,
             dueDate: dueDateComponents.flatMap { Calendar.current.date(from: $0) },
             dueDateIncludesTime: dueDateComponents?.hasTimeComponents ?? true

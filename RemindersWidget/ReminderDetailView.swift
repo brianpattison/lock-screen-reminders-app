@@ -68,7 +68,7 @@ struct ReminderDetailView: View {
     private var streakSummary: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
-                Text("\(streakState.currentCount) day streak")
+                Text("\(streakState.currentCount)-day streak")
                     .font(.headline)
                 Text(streakStatusMessage)
                     .font(.caption)
@@ -200,9 +200,14 @@ struct ReminderDetailView: View {
                     snapshot: snapshot
                 )
             } else {
+                let historyCreationFallback = Date()
                 let history = StreakHistory(
-                    reminders: result.incompleteReminders.map(\.streakHistoryReminder)
-                        + result.completedReminders.map(\.streakHistoryReminder)
+                    reminders: result.incompleteReminders.map {
+                        $0.streakHistoryReminder(creationDateFallback: historyCreationFallback)
+                    }
+                        + result.completedReminders.map {
+                            $0.streakHistoryReminder(creationDateFallback: historyCreationFallback)
+                        }
                 )
                 evaluation = StreakEngine().evaluate(
                     state: storedState,

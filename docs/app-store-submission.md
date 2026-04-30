@@ -20,9 +20,9 @@ Reminders Widget
 
 ### Promotional Text
 ```
-See 3 reminders on your Lock Screen, manage the matching list in the app, and keep a simple task streak. No ads, tracking, or account.
+See 3 reminders on your Lock Screen, manage the matching list in the app, and keep a simple task streak. No ads, no tracking, no account required.
 ```
-(136 characters -- within the 170-character limit. This field can be updated at any time without going through App Review.)
+(146 characters -- within the 170-character limit. This field can be updated at any time without going through App Review.)
 
 ### Description
 ```
@@ -278,7 +278,7 @@ You are now on the app's page in App Store Connect. Fill in the following sectio
 
 #### Promotional Text
 ```
-See 3 reminders on your Lock Screen, manage the matching list in the app, and keep a simple task streak. No ads, tracking, or account.
+See 3 reminders on your Lock Screen, manage the matching list in the app, and keep a simple task streak. No ads, no tracking, no account required.
 ```
 
 #### Description
