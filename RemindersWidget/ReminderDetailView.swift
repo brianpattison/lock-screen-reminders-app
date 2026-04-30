@@ -69,23 +69,18 @@ struct ReminderDetailView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("\(streakState.currentCount) \(streakState.currentCount == 1 ? "day" : "days")")
+                    Text("\(streakState.currentCount) day streak")
                         .font(.headline)
-                    Text("\(streakState.mode.title) streak")
+                    Text(streakStatusMessage)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
 
                 Spacer()
 
-                VStack(alignment: .trailing, spacing: 3) {
-                    Text("Best \(streakState.bestCount)")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                    Text("Today: \(todayStatusText)")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
+                Text("Best \(streakState.bestCount)")
+                    .font(.caption)
+                    .fontWeight(.semibold)
             }
         }
         .padding(.horizontal, 20)
@@ -93,18 +88,18 @@ struct ReminderDetailView: View {
         .background(listColor.opacity(0.10))
     }
 
-    private var todayStatusText: String {
+    private var streakStatusMessage: String {
         if isStreakQualifiedToday {
-            return "Complete"
+            return "Streak extended for today."
         }
 
         switch streakState.mode {
         case .noOverdue:
-            return "Clear overdue"
+            return "Clear overdue reminders to keep the streak."
         case .dailyProgress:
-            return "Complete one"
+            return "Complete a reminder to keep the streak."
         case .emptyList:
-            return "Finish the list"
+            return "Finish everything to keep the streak."
         }
     }
 
