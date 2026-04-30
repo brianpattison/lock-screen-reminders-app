@@ -684,6 +684,20 @@ final class StreakTests: XCTestCase {
         )
         XCTAssertFalse(twoDaysAgoQualifies)
     }
+
+    func testAvailableModesForTodayListReturnsOnlyNoOverdue() {
+        XCTAssertEqual(StreakMode.availableModes(forListID: SelectedListStore.todayID), [.noOverdue])
+    }
+
+    func testAvailableModesForRegularListReturnsAllModes() {
+        let modes = StreakMode.availableModes(forListID: "calendar-uuid")
+        XCTAssertEqual(Set(modes), Set(StreakMode.allCases))
+    }
+
+    func testAvailableModesForNilListReturnsAllModes() {
+        let modes = StreakMode.availableModes(forListID: nil)
+        XCTAssertEqual(Set(modes), Set(StreakMode.allCases))
+    }
 }
 
 final class StreakStoreTests: XCTestCase {

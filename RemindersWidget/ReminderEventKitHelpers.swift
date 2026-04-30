@@ -32,10 +32,6 @@ extension EKReminder {
         )
     }
 
-    func isInTodayScope(endingAt endOfDay: Date, calendar: Calendar = .current) -> Bool {
-        guard let dueDate = dueDateComponents.flatMap({ calendar.date(from: $0) }) else { return false }
-        return dueDate < endOfDay
-    }
 }
 
 private extension DateComponents {

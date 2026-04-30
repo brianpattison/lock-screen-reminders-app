@@ -208,45 +208,29 @@ struct ReminderDetailView: View {
             }
 
             let items = result.incompleteReminders.map(\.reminderItem)
-            let evaluation: StreakEvaluation
-
-            if listID == SelectedListStore.todayID {
-                let snapshot = StreakSnapshot(
-                    incompleteReminders: result.incompleteReminders.map(\.streakReminder),
-                    completedTodayCount: result.completedTodayInScopeCount
-                )
-                evaluation = StreakEngine().evaluate(
-                    state: storedState,
-                    listID: listID,
-                    snapshot: snapshot,
-                    now: now
-                )
-            } else {
-                // Currently-incomplete reminders without a creationDate (rare EventKit case)
-                // fall back to start-of-today: visible to today's qualification check (since
-                // `creationDate < now` holds for any non-midnight `now`), but invisible at the
-                // end of any prior day (`creationDate < end_of_past_day` is false), so they
-                // don't retroactively credit or break a backfilled day.
-                // Completed reminders almost always supply completionDate as the fallback;
-                // `.distantFuture` is only the safety-net for the (creation == nil &&
-                // completion == nil) corrupt case, which would never happen for a completed
-                // reminder anyway.
-                let startOfToday = Calendar.current.startOfDay(for: now)
-                let history = StreakHistory(
-                    reminders: result.incompleteReminders.map {
-                        $0.streakHistoryReminder(creationDateFallback: startOfToday)
+            // Currently-incomplete reminders without a creationDate (rare EventKit case) fall
+            // back to start-of-today: visible to today's qualification check (since
+            // `creationDate < now` holds for any non-midnight `now`), but invisible at the end
+            // of any prior day (`creationDate < end_of_past_day` is false), so they don't
+            // retroactively credit or break a backfilled day. Completed reminders almost always
+            // supply completionDate; `.distantFuture` is the safety-net for the
+            // (creation == nil && completion == nil) corrupt case, which would never happen for
+            // a completed reminder anyway.
+            let startOfToday = Calendar.current.startOfDay(for: now)
+            let history = StreakHistory(
+                reminders: result.incompleteReminders.map {
+                    $0.streakHistoryReminder(creationDateFallback: startOfToday)
+                }
+                    + result.completedReminders.map {
+                        $0.streakHistoryReminder(creationDateFallback: .distantFuture)
                     }
-                        + result.completedReminders.map {
-                            $0.streakHistoryReminder(creationDateFallback: .distantFuture)
-                        }
-                )
-                evaluation = StreakEngine().evaluate(
-                    state: storedState,
-                    listID: listID,
-                    history: history,
-                    now: now
-                )
-            }
+            )
+            let evaluation = StreakEngine().evaluate(
+                state: storedState,
+                listID: listID,
+                history: history,
+                now: now
+            )
 
             guard !Task.isCancelled else { return }
             reminders = sortReminders(items)
@@ -294,29 +278,16 @@ struct ReminderDetailView: View {
         }
 
         let incompleteReminders = await fetchReminders(matching: incompletePredicate)
-        let completedFetchStart = listID == SelectedListStore.todayID ? startOfDay : lookbackStart
         let completedPredicate = eventStore.predicateForCompletedReminders(
-            withCompletionDateStarting: completedFetchStart,
+            withCompletionDateStarting: lookbackStart,
             ending: endOfDay,
             calendars: selectedCalendars
         )
         let completedReminders = await fetchReminders(matching: completedPredicate)
 
-        let completedTodayInScopeCount: Int = {
-            let todayCompletions = completedReminders.filter { reminder in
-                guard let completionDate = reminder.completionDate else { return false }
-                return completionDate >= startOfDay && completionDate < endOfDay
-            }
-            if listID == SelectedListStore.todayID {
-                return todayCompletions.filter { $0.isInTodayScope(endingAt: endOfDay) }.count
-            }
-            return todayCompletions.count
-        }()
-
         return ReminderFetchResult(
             incompleteReminders: incompleteReminders,
-            completedReminders: completedReminders,
-            completedTodayInScopeCount: completedTodayInScopeCount
+            completedReminders: completedReminders
         )
     }
 
@@ -332,5 +303,4 @@ struct ReminderDetailView: View {
 private struct ReminderFetchResult {
     let incompleteReminders: [EKReminder]
     let completedReminders: [EKReminder]
-    let completedTodayInScopeCount: Int
 }

@@ -28,6 +28,17 @@ enum StreakMode: String, CaseIterable, Identifiable {
             return "Finish everything in the selected list."
         }
     }
+
+    // The Today list is a synthetic cross-calendar view: list membership is implicit and
+    // can't be reconstructed for past days. The Daily Progress and Empty List modes both
+    // depend on per-day membership, so they're disabled for Today. No Overdue only depends
+    // on each reminder's dueDate vs day boundary, which is well-defined cross-calendar.
+    static func availableModes(forListID listID: String?) -> [StreakMode] {
+        if listID == SelectedListStore.todayID {
+            return [.noOverdue]
+        }
+        return StreakMode.allCases
+    }
 }
 
 struct StreakReminder: Equatable {

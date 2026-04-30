@@ -186,6 +186,7 @@ struct ContentView: View {
 
                 NavigationLink {
                     StreakGoalSelectionView(
+                        availableModes: StreakMode.availableModes(forListID: selectedListID),
                         selectedMode: streakState.mode,
                         onSelect: requestStreakModeSelection
                     )
@@ -364,7 +365,12 @@ struct ContentView: View {
     }
 
     private func resetStreak(for listID: String?) {
-        let resetState = StreakStore().state.reset(for: listID)
+        // Today list only supports No Overdue (see StreakMode.availableModes). When switching
+        // to Today, force the mode regardless of what was previously selected; switching away
+        // from Today leaves the mode at No Overdue, which the user can change via the picker.
+        let availableModes = StreakMode.availableModes(forListID: listID)
+        let modeOverride: StreakMode? = availableModes.contains(streakState.mode) ? nil : availableModes.first
+        let resetState = StreakStore().state.reset(for: listID, mode: modeOverride)
         var store = StreakStore()
         store.state = resetState
         streakState = resetState
@@ -484,6 +490,7 @@ private struct WidgetListSelectionView: View {
 }
 
 private struct StreakGoalSelectionView: View {
+    let availableModes: [StreakMode]
     let selectedMode: StreakMode
     let onSelect: (StreakMode) -> Void
 
@@ -492,7 +499,7 @@ private struct StreakGoalSelectionView: View {
     var body: some View {
         List {
             Section {
-                ForEach(StreakMode.allCases) { mode in
+                ForEach(availableModes) { mode in
                     Button {
                         onSelect(mode)
                         dismiss()
