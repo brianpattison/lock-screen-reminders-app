@@ -299,8 +299,7 @@ struct ContentView: View {
     private func requestListSelection(id: String, title: String, color: Color) {
         guard selectedListID != id else { return }
 
-        let currentStreak = StreakStore().state.currentCount
-        if currentStreak > 0 {
+        if streakState.currentCount > 0 {
             pendingStreakChange = .list(id: id, title: title, color: color)
             showStreakResetConfirmation = true
         } else {
@@ -328,8 +327,7 @@ struct ContentView: View {
     private func requestStreakModeSelection(_ mode: StreakMode) {
         guard streakState.mode != mode else { return }
 
-        let currentStreak = StreakStore().state.currentCount
-        if currentStreak > 0 {
+        if streakState.currentCount > 0 {
             pendingStreakChange = .mode(mode)
             showStreakResetConfirmation = true
         } else {
