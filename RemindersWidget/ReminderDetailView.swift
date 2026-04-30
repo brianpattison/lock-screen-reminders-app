@@ -7,16 +7,19 @@ struct ReminderDetailView: View {
     let listTitle: String
     let listColor: Color
     let eventStore: EKEventStore
+    @Binding var streakState: StreakState
     @Binding var showSettings: Bool
 
     @State private var reminders: [ReminderItem] = []
     @State private var completingIDs: Set<String> = []
     @State private var fetchTask: Task<Void, Never>?
+    @State private var isStreakQualifiedToday = false
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         VStack(spacing: 0) {
             header
+            streakSummary
             if reminders.isEmpty {
                 Spacer()
                 Text("No Reminders")
@@ -30,6 +33,7 @@ struct ReminderDetailView: View {
         .onChange(of: listID) { _, _ in
             reminders = []
             completingIDs = []
+            isStreakQualifiedToday = false
             fetchReminders()
         }
         .onChange(of: scenePhase) { _, newPhase in
@@ -54,22 +58,64 @@ struct ReminderDetailView: View {
                     .font(.title2)
                     .foregroundStyle(.secondary)
             }
-            Button {
-                openRemindersApp()
-            } label: {
-                Image(systemName: "arrow.up.forward.app")
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
-            }
         }
         .padding(.horizontal, 20)
         .padding(.top, 16)
         .padding(.bottom, 8)
     }
 
+    private var streakSummary: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(listTitle)
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundStyle(listColor)
+                .lineLimit(1)
+
+            HStack(alignment: .center, spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("\(streakState.currentCount) \(streakState.currentCount == 1 ? "day" : "days")")
+                        .font(.headline)
+                    Text("\(streakState.mode.title) streak")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 3) {
+                    Text("Best \(streakState.bestCount)")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                    Text("Today: \(todayStatusText)")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(listColor.opacity(0.10))
+    }
+
+    private var todayStatusText: String {
+        if isStreakQualifiedToday {
+            return "Complete"
+        }
+
+        switch streakState.mode {
+        case .noOverdue:
+            return "Clear overdue"
+        case .dailyProgress:
+            return "Complete one"
+        case .emptyList:
+            return "Finish the list"
+        }
+    }
+
     private var reminderList: some View {
         List {
-            Section(listTitle) {
+            Section("Reminders") {
                 ForEach(reminders) { reminder in
                     reminderRow(reminder)
                         .transition(.opacity.combined(with: .move(edge: .leading)))
@@ -127,6 +173,7 @@ struct ReminderDetailView: View {
                 completingIDs.remove(reminder.id)
             }
             WidgetCenter.shared.reloadAllTimelines()
+            fetchReminders()
         }
     }
 
@@ -139,51 +186,87 @@ struct ReminderDetailView: View {
     @MainActor private func fetchReminders() {
         fetchTask?.cancel()
         fetchTask = Task {
-            let ekReminders: [EKReminder]
-
-            if listID == SelectedListStore.todayID {
-                let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
-                let predicate = eventStore.predicateForIncompleteReminders(
-                    withDueDateStarting: .distantPast,
-                    ending: endOfDay,
-                    calendars: nil
-                )
-                ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
-                    _ = eventStore.fetchReminders(matching: predicate) { reminders in
-                        continuation.resume(returning: reminders ?? [])
-                    }
-                }
-            } else {
-                let calendars = eventStore.calendars(for: .reminder)
-                guard let calendar = calendars.first(where: { $0.calendarIdentifier == listID }) else {
-                    reminders = []
-                    return
-                }
-
-                let predicate = eventStore.predicateForIncompleteReminders(
-                    withDueDateStarting: nil,
-                    ending: nil,
-                    calendars: [calendar]
-                )
-                ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
-                    _ = eventStore.fetchReminders(matching: predicate) { reminders in
-                        continuation.resume(returning: reminders ?? [])
-                    }
-                }
+            guard let result = await fetchReminderSnapshot() else {
+                guard !Task.isCancelled else { return }
+                reminders = []
+                return
             }
 
-            let items = ekReminders
-                .map { reminder in
-                    ReminderItem(
-                        title: reminder.title ?? "",
-                        dueDate: reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) },
-                        creationDate: reminder.creationDate,
-                        calendarItemIdentifier: reminder.calendarItemIdentifier
-                    )
-                }
+            let items = result.incompleteReminders.map(\.reminderItem)
+            let snapshot = StreakSnapshot(
+                incompleteReminders: result.incompleteReminders.map(\.streakReminder),
+                completedTodayCount: result.completedTodayCount
+            )
+            let evaluation = StreakEngine().evaluate(
+                state: StreakStore().state,
+                listID: listID,
+                snapshot: snapshot
+            )
 
             guard !Task.isCancelled else { return }
             reminders = sortReminders(items)
+            var store = StreakStore()
+            store.state = evaluation.state
+            streakState = evaluation.state
+            isStreakQualifiedToday = evaluation.isQualifiedToday
         }
     }
+
+    private func fetchReminderSnapshot() async -> ReminderFetchResult? {
+        let startOfDay = Calendar.current.startOfDay(for: Date())
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+
+        let selectedCalendars: [EKCalendar]?
+        let incompletePredicate: NSPredicate
+
+        if listID == SelectedListStore.todayID {
+            selectedCalendars = nil
+            incompletePredicate = eventStore.predicateForIncompleteReminders(
+                withDueDateStarting: .distantPast,
+                ending: endOfDay,
+                calendars: nil
+            )
+        } else {
+            let calendars = eventStore.calendars(for: .reminder)
+            guard let selectedCalendar = calendars.first(where: { $0.calendarIdentifier == listID }) else {
+                return nil
+            }
+            selectedCalendars = [selectedCalendar]
+            incompletePredicate = eventStore.predicateForIncompleteReminders(
+                withDueDateStarting: nil,
+                ending: nil,
+                calendars: selectedCalendars
+            )
+        }
+
+        let incompleteReminders = await fetchReminders(matching: incompletePredicate)
+        let completedPredicate = eventStore.predicateForCompletedReminders(
+            withCompletionDateStarting: startOfDay,
+            ending: endOfDay,
+            calendars: selectedCalendars
+        )
+        var completedReminders = await fetchReminders(matching: completedPredicate)
+
+        if listID == SelectedListStore.todayID {
+            completedReminders = completedReminders.filter { $0.isInTodayScope(endingAt: endOfDay) }
+        }
+
+        return ReminderFetchResult(
+            incompleteReminders: incompleteReminders,
+            completedTodayCount: completedReminders.count
+        )
+    }
+
+    private func fetchReminders(matching predicate: NSPredicate) async -> [EKReminder] {
+        await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
+            _ = eventStore.fetchReminders(matching: predicate) { reminders in
+                continuation.resume(returning: reminders ?? [])
+            }
+        }
+    }
+}
+
+private struct ReminderFetchResult {
+    let incompleteReminders: [EKReminder]
+    let completedTodayCount: Int
 }

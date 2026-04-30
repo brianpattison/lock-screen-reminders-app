@@ -20,7 +20,7 @@ Reminders Widget
 
 ### Promotional Text
 ```
-See 3 reminders on your Lock Screen instead of just 2. Pick any list, tap to open Reminders. No ads, no tracking, no account required.
+See 3 reminders on your Lock Screen, manage the matching list in the app, and keep a simple task streak. No ads, tracking, or account.
 ```
 (136 characters -- within the 170-character limit. This field can be updated at any time without going through App Review.)
 
@@ -28,30 +28,32 @@ See 3 reminders on your Lock Screen instead of just 2. Pick any list, tap to ope
 ```
 Your Lock Screen should show you what matters. Apple's built-in Reminders widget used to display 3 items -- then they changed it to show only 2, and tapping now marks a reminder as complete instead of opening the app. If you've been frustrated by that change, this app fixes it.
 
-Reminders Widget gives you a clean Lock Screen widget that shows 3 reminders from any list you choose. Tap the widget to open the Reminders app. That's it. No extra features you didn't ask for, no surprises.
+Reminders Widget gives you a clean Lock Screen widget that shows 3 reminders from a list you choose in the app. The app also lets you view that same list, complete reminders, open Reminders when you need the full app, and track a simple streak for staying on top of the selected list.
 
 HOW IT WORKS
 
 1. Install the app and grant access to your reminders.
-2. Add the widget to your Lock Screen (long-press your Lock Screen, tap Customize, choose Lock Screen, tap Add Widgets, and select Reminders Widget).
-3. Long-press the widget and tap Edit Widget to pick which Reminders list to display.
-4. Your 3 most relevant reminders appear on your Lock Screen, sorted by due date.
+2. Choose the Reminders list the widget should display.
+3. Add the widget to your Lock Screen (long-press your Lock Screen, tap Customize, choose Lock Screen, tap Add Widgets, and select Reminders Widget).
+4. View and complete reminders in the app, and keep your streak going with the goal you choose.
 
 WHAT YOU GET
 
 - A Lock Screen widget that displays 3 reminders instead of 2.
-- Choose which Reminders list to show.
+- Choose which Reminders list to show from inside the app.
+- View and complete reminders from the selected list in a focused native app.
+- Track a configurable streak: No Overdue, Daily Progress, or Empty List.
 - Tap the widget to open the Reminders app -- no accidental completions.
 - Clean design that matches the native iOS look.
 - Reminders are sorted by due date, then by creation date, so the most urgent items show first.
 
 PRIVACY FIRST
 
-This app accesses your reminders only to display them in the widget. Nothing leaves your device. There are no analytics, no ads, no accounts, no servers. Your data stays on your phone.
+This app accesses your reminders only to display them in the widget and selected-list view, complete reminders you tap in the app, and calculate your local streak. Nothing leaves your device. There are no analytics, no ads, no accounts, no servers. Your data stays on your phone.
 
-Reminders Widget is a small, focused utility that restores functionality Apple took away. If you relied on seeing 3 reminders at a glance, this is for you.
+Reminders Widget is a small, focused utility for seeing the right reminders at a glance and keeping one important list under control.
 ```
-(1,197 characters -- well within the 4,000-character limit)
+(1,425 characters -- well within the 4,000-character limit)
 
 ### Keywords
 ```
@@ -141,9 +143,9 @@ You may also want to provide:
 
 **Tip:** If you provide only the 6.7-inch screenshots, App Store Connect can auto-scale for smaller sizes. But providing device-specific screenshots looks more professional.
 
-### What to Show -- 3 Recommended Screenshots
+### What to Show -- 4 Recommended Screenshots
 
-Since this is a Lock Screen widget app, your screenshots should focus on the widget itself, not the host app.
+Since this is a Lock Screen widget app with a useful host app, screenshots should show both the widget and the native selected-list workflow.
 
 **Screenshot 1 -- The Widget in Action**
 - Show an iPhone Lock Screen with the Reminders Widget visible in the widget area below the clock.
@@ -151,18 +153,18 @@ Since this is a Lock Screen widget app, your screenshots should focus on the wid
 - This is your hero screenshot. It should immediately communicate what the app does.
 - Consider adding a brief overlay caption: "See 3 reminders on your Lock Screen"
 
-**Screenshot 2 -- Edit Widget / List Selection**
-- Show the "Edit Widget" interface where the user picks which Reminders list to display.
-- This demonstrates the customization feature.
-- Overlay caption: "Choose any Reminders list"
+**Screenshot 2 -- Native List View**
+- Show the app displaying the selected reminder list with the streak summary at the top.
+- Include a few realistic reminders and the "Open Reminders" action.
+- Overlay caption: "View and complete the selected list"
 
-**Screenshot 3 -- Comparison with Apple's Widget**
+**Screenshot 3 -- List Selection and Streak Goal**
+- Show the settings sheet with the widget list picker, streak goal picker, and widget preview.
+- Overlay caption: "Choose a list and streak goal"
+
+**Screenshot 4 -- Comparison with Apple's Widget**
 - Side-by-side or before/after showing Apple's native widget (2 reminders) vs. Reminders Widget (3 reminders).
 - Overlay caption: "3 reminders instead of 2"
-
-**Optional Screenshot 4 -- The Host App**
-- Show the main app screen with its setup instructions.
-- This helps reviewers understand the app has a functional host app (Apple requires widget apps to have a host app that does something beyond a blank screen).
 
 ### Capturing Screenshots
 
@@ -276,7 +278,7 @@ You are now on the app's page in App Store Connect. Fill in the following sectio
 
 #### Promotional Text
 ```
-See 3 reminders on your Lock Screen instead of just 2. Pick any list, tap to open Reminders. No ads, no tracking, no account required.
+See 3 reminders on your Lock Screen, manage the matching list in the app, and keep a simple task streak. No ads, tracking, or account.
 ```
 
 #### Description
@@ -304,14 +306,15 @@ You will come back to this after uploading a build (Step 7).
 2. **Contact Information:** Enter your name, email, and phone number. Apple may contact you during review.
 3. **Notes:** Add the following note to help the reviewer:
    ```
-   This app provides a Lock Screen widget for the Reminders app. To test:
+   This app provides a native selected-list companion app and Lock Screen widget for Reminders. To test:
    1. Open the app and grant Reminders access.
-   2. Go to the Lock Screen, long-press, tap Customize, choose Lock Screen, tap Add Widgets.
-   3. Find "Reminders Widget" in the widget list and add the rectangular widget.
-   4. Long-press the widget and tap "Edit Widget" to select a Reminders list.
-   The widget will display 3 reminders from the selected list. Tapping the widget opens the Reminders app.
+   2. Choose a Reminders list in the app.
+   3. View the selected list in the app, tap a reminder circle to complete it, and use Settings to choose a streak goal: No Overdue, Daily Progress, or Empty List.
+   4. Go to the Lock Screen, long-press, tap Customize, choose Lock Screen, tap Add Widgets.
+   5. Find "Reminders Widget" in the widget list and add the rectangular widget.
+   The widget will display 3 reminders from the list selected in the app. Tapping the widget opens the Reminders app.
    
-   Please ensure you have at least one Reminders list with 3+ items to see the full widget.
+   Please ensure you have at least one Reminders list with 3+ items to see the full widget and selected-list view.
    ```
 
 #### Version Release

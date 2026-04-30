@@ -8,9 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		2177894E5882791340E8C8EE /* RemindersTimelineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC6C1A566ADA0238F892085 /* RemindersTimelineProvider.swift */; };
+		27D18EF6C866453FD0364ED2 /* Streak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F08C26470F54E33A2087722 /* Streak.swift */; };
 		31C712936EE7E2A3D8D1E855 /* ReminderDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18CDCF5343E43D3B5D646B79 /* ReminderDetailView.swift */; };
 		33F42AEBE1AC5F7E93F0320A /* ReminderItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C7264B25C92FC2EB631428B /* ReminderItem.swift */; };
 		36D50988132C8F651EAB99F6 /* ReminderItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C7264B25C92FC2EB631428B /* ReminderItem.swift */; };
+		3D7587BD1C3A6EAB216A611F /* Streak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F08C26470F54E33A2087722 /* Streak.swift */; };
 		4033DAC8371499761217F6F6 /* ReminderListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13ADDE3707989BFC52BF5E0 /* ReminderListView.swift */; };
 		419C35BB15F1D042C9BA26AA /* SelectedListStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22832FF3498365ADB9BCED95 /* SelectedListStoreTests.swift */; };
 		4B52F161E7AEDB0CEAC49374 /* ReminderEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F06D0F468A53B092C2B278A /* ReminderEntry.swift */; };
@@ -21,12 +23,15 @@
 		6968D08D0A8A29532CE2AF3C /* SelectedListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC726CC55ADDEFEDDC6F6B3D /* SelectedListStore.swift */; };
 		75414224CAE7BAC9F88FED96 /* RemindersLockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D3F2ADD9C217046F8E5AA4F /* RemindersLockScreenWidget.swift */; };
 		7F9C8F743FD793FD6C6518C4 /* SelectedListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC726CC55ADDEFEDDC6F6B3D /* SelectedListStore.swift */; };
+		82C6E0CD9B3C4D1B7F955FB7 /* ReminderEventKitHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 740840A9AFB3872AA2C9CF0D /* ReminderEventKitHelpers.swift */; };
 		86443101D3F8D7BF543D8B0C /* ReminderSortingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42944864AFB07BA0AEFB99FB /* ReminderSortingTests.swift */; };
 		9C395E5C41DE432E0CF314D6 /* RemindersWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FC4AFDD3CB539EBBB2A75906 /* RemindersWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A25FDACB1F2ADE94462B62D6 /* RemindersWidgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C0938BCB77EAD48E521E9EB /* RemindersWidgetApp.swift */; };
+		A9277B2E8BF4D937B7BDFEDB /* Streak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F08C26470F54E33A2087722 /* Streak.swift */; };
 		AA02851BA251553E225B6FF5 /* ReminderItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C7264B25C92FC2EB631428B /* ReminderItem.swift */; };
 		B8A593FD9B011D4A2AB0EBAE /* SelectedListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC726CC55ADDEFEDDC6F6B3D /* SelectedListStore.swift */; };
 		C236F250EFBBE448852B1B95 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA8AC5DBEC6EC0E0A7CB05C /* ContentView.swift */; };
+		C7256AE17F18B60F3861BD18 /* StreakTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B147530ADEC8C2EC6FD01F8 /* StreakTests.swift */; };
 		E351A4685E8E20032803AEA8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CE503C61B04B327F7144F66A /* Assets.xcassets */; };
 		F054B7EEBB9CB8612065735F /* RemindersWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D86AB43E8ADD9A682363D2B /* RemindersWidgetView.swift */; };
 /* End PBXBuildFile section */
@@ -72,11 +77,14 @@
 		41B4D64FB7C0297C2F010024 /* RemindersWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RemindersWidgetExtension.entitlements; sourceTree = "<group>"; };
 		42944864AFB07BA0AEFB99FB /* ReminderSortingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderSortingTests.swift; sourceTree = "<group>"; };
 		5F252BC69F06EEAD565FF4F3 /* RemindersWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RemindersWidget.entitlements; sourceTree = "<group>"; };
+		6B147530ADEC8C2EC6FD01F8 /* StreakTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakTests.swift; sourceTree = "<group>"; };
+		740840A9AFB3872AA2C9CF0D /* ReminderEventKitHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderEventKitHelpers.swift; sourceTree = "<group>"; };
 		7C0938BCB77EAD48E521E9EB /* RemindersWidgetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersWidgetApp.swift; sourceTree = "<group>"; };
 		7C7264B25C92FC2EB631428B /* ReminderItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderItem.swift; sourceTree = "<group>"; };
 		84E97036445FC7E38F69FDFA /* RemindersWidget.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RemindersWidget.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D3F2ADD9C217046F8E5AA4F /* RemindersLockScreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersLockScreenWidget.swift; sourceTree = "<group>"; };
 		8F06D0F468A53B092C2B278A /* ReminderEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderEntry.swift; sourceTree = "<group>"; };
+		9F08C26470F54E33A2087722 /* Streak.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Streak.swift; sourceTree = "<group>"; };
 		ACA8AC5DBEC6EC0E0A7CB05C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		CE503C61B04B327F7144F66A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F13ADDE3707989BFC52BF5E0 /* ReminderListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderListView.swift; sourceTree = "<group>"; };
@@ -103,6 +111,7 @@
 			children = (
 				42944864AFB07BA0AEFB99FB /* ReminderSortingTests.swift */,
 				22832FF3498365ADB9BCED95 /* SelectedListStoreTests.swift */,
+				6B147530ADEC8C2EC6FD01F8 /* StreakTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -122,6 +131,7 @@
 			children = (
 				ACA8AC5DBEC6EC0E0A7CB05C /* ContentView.swift */,
 				18CDCF5343E43D3B5D646B79 /* ReminderDetailView.swift */,
+				740840A9AFB3872AA2C9CF0D /* ReminderEventKitHelpers.swift */,
 				FBBDBFAC53010254917E37DA /* ReminderListIcon.swift */,
 				5F252BC69F06EEAD565FF4F3 /* RemindersWidget.entitlements */,
 				7C0938BCB77EAD48E521E9EB /* RemindersWidgetApp.swift */,
@@ -148,6 +158,7 @@
 				7C7264B25C92FC2EB631428B /* ReminderItem.swift */,
 				F13ADDE3707989BFC52BF5E0 /* ReminderListView.swift */,
 				FC726CC55ADDEFEDDC6F6B3D /* SelectedListStore.swift */,
+				9F08C26470F54E33A2087722 /* Streak.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -275,6 +286,7 @@
 				66DC4BF61784A0BB997C95E2 /* RemindersWidgetBundle.swift in Sources */,
 				F054B7EEBB9CB8612065735F /* RemindersWidgetView.swift in Sources */,
 				B8A593FD9B011D4A2AB0EBAE /* SelectedListStore.swift in Sources */,
+				3D7587BD1C3A6EAB216A611F /* Streak.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,11 +296,13 @@
 			files = (
 				C236F250EFBBE448852B1B95 /* ContentView.swift in Sources */,
 				31C712936EE7E2A3D8D1E855 /* ReminderDetailView.swift in Sources */,
+				82C6E0CD9B3C4D1B7F955FB7 /* ReminderEventKitHelpers.swift in Sources */,
 				AA02851BA251553E225B6FF5 /* ReminderItem.swift in Sources */,
 				57EAF2234ECF370ACB3037E6 /* ReminderListIcon.swift in Sources */,
 				5F2073C1217866CFBF47681D /* ReminderListView.swift in Sources */,
 				A25FDACB1F2ADE94462B62D6 /* RemindersWidgetApp.swift in Sources */,
 				6968D08D0A8A29532CE2AF3C /* SelectedListStore.swift in Sources */,
+				A9277B2E8BF4D937B7BDFEDB /* Streak.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -301,6 +315,8 @@
 				86443101D3F8D7BF543D8B0C /* ReminderSortingTests.swift in Sources */,
 				7F9C8F743FD793FD6C6518C4 /* SelectedListStore.swift in Sources */,
 				419C35BB15F1D042C9BA26AA /* SelectedListStoreTests.swift in Sources */,
+				27D18EF6C866453FD0364ED2 /* Streak.swift in Sources */,
+				C7256AE17F18B60F3861BD18 /* StreakTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -324,7 +340,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = RemindersWidgetExtension/RemindersWidgetExtension.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				INFOPLIST_FILE = RemindersWidgetExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Lock Screen";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -345,7 +361,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = RemindersWidget/RemindersWidget.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Lock Screen";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -467,7 +483,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = RemindersWidget/RemindersWidget.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Lock Screen";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -546,7 +562,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = RemindersWidgetExtension/RemindersWidgetExtension.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				INFOPLIST_FILE = RemindersWidgetExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Lock Screen";
 				LD_RUNPATH_SEARCH_PATHS = (
