@@ -582,6 +582,31 @@ final class StreakTests: XCTestCase {
         XCTAssertEqual(evaluation.state.bestCount, 9)
     }
 
+    func testHistoryStickyPreservesStreakCountButFlagsTodayNotCurrentlyQualified() {
+        // Day was already earned earlier today (lastQualifiedDay = today, count = 5). The user
+        // then added a reminder so the list is currently non-empty. The streak count and
+        // lastQualifiedDay must stay put (sticky preserves the earned day), but isQualifiedToday
+        // flips to false so the UI label reflects current state.
+        let earlierToday = hourOffset(8, from: startOfDay(now))
+        let state = StreakState(
+            mode: .emptyList,
+            listID: "list-1",
+            currentCount: 5,
+            bestCount: 5,
+            lastQualifiedDay: startOfDay(now)
+        )
+        let history = StreakHistory(reminders: [
+            StreakHistoryReminder(creationDate: earlierToday, completionDate: nil),
+        ])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.currentCount, 5)
+        XCTAssertEqual(evaluation.state.bestCount, 5)
+        XCTAssertEqual(evaluation.state.lastQualifiedDay, startOfDay(now))
+        XCTAssertFalse(evaluation.isQualifiedToday)
+    }
+
     func testQualifiesOnDayDailyProgressFailsBothDaysWhenReminderRemainsIncomplete() {
         // Reminder created two days ago at noon, never completed. Under end-of-day semantics,
         // both gap days end with the list non-empty and no completion -> neither qualifies.
