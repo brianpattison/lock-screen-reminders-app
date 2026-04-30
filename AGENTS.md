@@ -40,3 +40,7 @@ Two targets in one Xcode project:
 # Generate the app icon (requires numpy and Pillow)
 python3 generate_icon.py AppIcon.png
 ```
+
+## Docs Screenshots
+
+When updating `docs/screenshot-*.png`, follow the detailed workflow in `docs/SCREENSHOTS.md`. It documents the sample Reminders data, Simulator setup, capture filenames, dimension checks, and thumbnail generation command.

@@ -40,7 +40,7 @@ struct ReminderDetailView: View {
         .onChange(of: streakState.mode) { _, _ in
             // Goal change in settings resets streak state in the store; re-evaluate against
             // the current list contents so the banner doesn't show a stale 0-day streak when
-            // the new mode trivially qualifies today (e.g. switched to Empty List on an
+            // the new mode trivially qualifies today (e.g. switched to Complete All on an
             // already-empty list).
             fetchReminders()
         }
@@ -111,7 +111,7 @@ struct ReminderDetailView: View {
         switch streakState.mode {
         case .noOverdue:
             // Today already implies "due today or overdue", so "all overdue" reads as redundant
-            // there. Phrase it the same as Empty List for the Today list.
+            // there. Phrase it the same as Complete All for the Today list.
             if listID == SelectedListStore.todayID {
                 return "Complete all reminders today."
             }

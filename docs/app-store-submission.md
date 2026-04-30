@@ -42,7 +42,7 @@ WHAT YOU GET
 - A Lock Screen widget that displays 3 reminders instead of 2.
 - Choose which Reminders list to show from inside the app.
 - View and complete reminders from the selected list in a focused native app.
-- Track a configurable streak: No Overdue, Daily Progress, or Empty List.
+- Track a configurable streak: No Overdue, Daily Progress, or Complete All.
 - Tap the widget to open the Reminders app -- no accidental completions.
 - Clean design that matches the native iOS look.
 - Reminders are sorted by due date, then by creation date, so the most urgent items show first.
@@ -149,7 +149,7 @@ Since this is a Lock Screen widget app with a useful host app, screenshots shoul
 
 **Screenshot 1 -- The Widget in Action**
 - Show an iPhone Lock Screen with the Reminders Widget visible in the widget area below the clock.
-- The widget should display 3 reminders from a realistic-looking list (e.g., "Grocery Store" with items like "Milk," "Eggs," "Bread").
+- The widget should display 3 reminders from a realistic-looking habit list (e.g., "Daily Routine" with items like "Take vitamins," "Walk 10 minutes," and "Read 10 pages").
 - This is your hero screenshot. It should immediately communicate what the app does.
 - Consider adding a brief overlay caption: "See 3 reminders on your Lock Screen"
 
@@ -309,7 +309,7 @@ You will come back to this after uploading a build (Step 7).
    This app provides a native selected-list companion app and Lock Screen widget for Reminders. To test:
    1. Open the app and grant Reminders access.
    2. Choose a Reminders list in the app.
-   3. View the selected list in the app, tap a reminder circle to complete it, and use Settings to choose a streak goal: No Overdue, Daily Progress, or Empty List.
+   3. View the selected list in the app, tap a reminder circle to complete it, and use Settings to choose a streak goal: No Overdue, Daily Progress, or Complete All.
    4. Go to the Lock Screen, long-press, tap Customize, choose Lock Screen, tap Add Widgets.
    5. Find "Reminders Widget" in the widget list and add the rectangular widget.
    The widget will display 3 reminders from the list selected in the app. Tapping the widget opens the Reminders app.
