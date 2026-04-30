@@ -141,10 +141,18 @@ struct StreakEngine {
         let baseState = state.listID == listID ? state : state.reset(for: listID)
         let today = calendar.startOfDay(for: now)
 
-        var runningCount = baseState.currentCount
-        var runningLastQualified = baseState.lastQualifiedDay
+        // Normalize stored lastQualifiedDay to today's calendar's start-of-day so the day-by-day
+        // walk is stable across timezone changes and never starts mid-day. Clamp future values
+        // (corrupt state) by treating them as missing.
+        let normalizedLastQualified: Date? = baseState.lastQualifiedDay.flatMap { stored in
+            let normalized = calendar.startOfDay(for: stored)
+            return normalized > today ? nil : normalized
+        }
 
-        if let last = baseState.lastQualifiedDay,
+        var runningCount = baseState.currentCount
+        var runningLastQualified = normalizedLastQualified
+
+        if let last = normalizedLastQualified,
            let firstGapDay = calendar.date(byAdding: .day, value: 1, to: last) {
             var dayCursor = firstGapDay
             while dayCursor < today {
@@ -152,18 +160,17 @@ struct StreakEngine {
                 let qualified = qualifiesOnDay(
                     mode: baseState.mode,
                     history: history,
-                    dayStart: dayCursor,
-                    dayEnd: nextDay,
+                    dayWindow: dayCursor..<nextDay,
                     calendar: calendar
                 )
 
                 if qualified {
                     let prevDay = calendar.date(byAdding: .day, value: -1, to: dayCursor)
-                    let continues: Bool = {
-                        guard let last = runningLastQualified, let prev = prevDay else { return false }
-                        return calendar.isDate(last, inSameDayAs: prev)
+                    let continuesStreak: Bool = {
+                        guard let prior = runningLastQualified, let prev = prevDay else { return false }
+                        return calendar.isDate(prior, inSameDayAs: prev)
                     }()
-                    runningCount = continues ? runningCount + 1 : 1
+                    runningCount = continuesStreak ? runningCount + 1 : 1
                     runningLastQualified = dayCursor
                 } else {
                     runningCount = 0
@@ -174,11 +181,14 @@ struct StreakEngine {
             }
         }
 
+        // Today's window is [start_of_today, now). Empty when now == start_of_today exactly.
+        // The history path treats today as qualified if the criteria held at any moment so far,
+        // which is more permissive than the snapshot path's "right now" check.
+        let todayWindow = today..<max(today, now)
         let qualifiedToday = qualifiesOnDay(
             mode: baseState.mode,
             history: history,
-            dayStart: today,
-            dayEnd: max(today, now),
+            dayWindow: todayWindow,
             calendar: calendar
         )
 
@@ -212,30 +222,26 @@ struct StreakEngine {
     func qualifiesOnDay(
         mode: StreakMode,
         history: StreakHistory,
-        dayStart: Date,
-        dayEnd: Date,
+        dayWindow: Range<Date>,
         calendar: Calendar = .current
     ) -> Bool {
         switch mode {
         case .dailyProgress:
-            if hasCompletion(in: dayStart, through: dayEnd, history: history) {
+            if hasCompletion(in: dayWindow, history: history) {
                 return true
             }
             return hasUncoveredMoment(
-                dayStart: dayStart,
-                dayEnd: dayEnd,
+                dayWindow: dayWindow,
                 intervals: incompleteIntervals(history: history)
             )
         case .emptyList:
             return hasUncoveredMoment(
-                dayStart: dayStart,
-                dayEnd: dayEnd,
+                dayWindow: dayWindow,
                 intervals: incompleteIntervals(history: history)
             )
         case .noOverdue:
             return hasUncoveredMoment(
-                dayStart: dayStart,
-                dayEnd: dayEnd,
+                dayWindow: dayWindow,
                 intervals: overdueIntervals(history: history, calendar: calendar)
             )
         }
@@ -307,21 +313,24 @@ struct StreakEngine {
         )
     }
 
-    private func hasCompletion(in start: Date, through end: Date, history: StreakHistory) -> Bool {
-        history.reminders.contains { reminder in
+    private func hasCompletion(in window: Range<Date>, history: StreakHistory) -> Bool {
+        guard !window.isEmpty else { return false }
+        return history.reminders.contains { reminder in
             guard let completed = reminder.completionDate else { return false }
-            return completed >= start && completed < end
+            return window.contains(completed)
         }
     }
 
-    private func incompleteIntervals(history: StreakHistory) -> [(start: Date, end: Date)] {
-        history.reminders.map { reminder in
-            (start: reminder.creationDate, end: reminder.completionDate ?? .distantFuture)
+    private func incompleteIntervals(history: StreakHistory) -> [Range<Date>] {
+        history.reminders.compactMap { reminder -> Range<Date>? in
+            let end = reminder.completionDate ?? .distantFuture
+            guard reminder.creationDate < end else { return nil }
+            return reminder.creationDate..<end
         }
     }
 
-    private func overdueIntervals(history: StreakHistory, calendar: Calendar) -> [(start: Date, end: Date)] {
-        history.reminders.compactMap { reminder -> (start: Date, end: Date)? in
+    private func overdueIntervals(history: StreakHistory, calendar: Calendar) -> [Range<Date>] {
+        history.reminders.compactMap { reminder -> Range<Date>? in
             guard let dueDate = reminder.dueDate else { return nil }
             let threshold: Date
             if reminder.dueDateIncludesTime {
@@ -333,32 +342,33 @@ struct StreakEngine {
             let start = max(reminder.creationDate, threshold)
             let end = reminder.completionDate ?? .distantFuture
             guard start < end else { return nil }
-            return (start: start, end: end)
+            return start..<end
         }
     }
 
+    // Returns true if any moment in `dayWindow` is not covered by any blocking interval.
+    // O(n log n) sweep: sort intervals by start, advance a coverage frontier; a gap means uncovered.
     private func hasUncoveredMoment(
-        dayStart: Date,
-        dayEnd: Date,
-        intervals: [(start: Date, end: Date)]
+        dayWindow: Range<Date>,
+        intervals: [Range<Date>]
     ) -> Bool {
-        guard dayStart < dayEnd else { return false }
+        guard !dayWindow.isEmpty else { return false }
 
-        let relevant = intervals.filter { $0.start < dayEnd && $0.end > dayStart }
+        let relevant = intervals.filter { $0.overlaps(dayWindow) }
         if relevant.isEmpty { return true }
 
-        let sorted = relevant.sorted { $0.start < $1.start }
-        var coverage = dayStart
+        let sorted = relevant.sorted { $0.lowerBound < $1.lowerBound }
+        var coverage = dayWindow.lowerBound
         for interval in sorted {
-            if interval.start > coverage {
+            if interval.lowerBound > coverage {
                 return true
             }
-            coverage = max(coverage, interval.end)
-            if coverage >= dayEnd {
+            coverage = max(coverage, interval.upperBound)
+            if coverage >= dayWindow.upperBound {
                 return false
             }
         }
-        return coverage < dayEnd
+        return coverage < dayWindow.upperBound
     }
 
     private func isOverdue(_ reminder: StreakReminder, now: Date, calendar: Calendar) -> Bool {

@@ -490,8 +490,7 @@ final class StreakTests: XCTestCase {
         let yesterdayQualifies = engine.qualifiesOnDay(
             mode: .dailyProgress,
             history: history,
-            dayStart: dayOffset(-1),
-            dayEnd: startOfDay(now),
+            dayWindow: dayOffset(-1)..<startOfDay(now),
             calendar: calendar
         )
         XCTAssertFalse(yesterdayQualifies)
@@ -499,8 +498,7 @@ final class StreakTests: XCTestCase {
         let twoDaysAgoQualifies = engine.qualifiesOnDay(
             mode: .dailyProgress,
             history: history,
-            dayStart: dayOffset(-2),
-            dayEnd: dayOffset(-1),
+            dayWindow: dayOffset(-2)..<dayOffset(-1),
             calendar: calendar
         )
         XCTAssertTrue(twoDaysAgoQualifies)
