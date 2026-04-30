@@ -113,13 +113,63 @@ final class StreakTests: XCTestCase {
         XCTAssertEqual(evaluation.state.bestCount, 4)
     }
 
-    func testStreakResetsWhenTodayDoesNotQualify() {
+    func testStreakStaysAliveWhenYesterdayQualifiedButTodayNotYet() {
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: now))!
         let state = StreakState(
             mode: .emptyList,
             listID: "list-1",
             currentCount: 4,
             bestCount: 4,
-            lastQualifiedDay: calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: now))!
+            lastQualifiedDay: yesterday
+        )
+
+        let evaluation = engine.evaluate(
+            state: state,
+            listID: "list-1",
+            snapshot: StreakSnapshot(incompleteReminders: [StreakReminder(dueDate: nil)]),
+            now: now,
+            calendar: calendar
+        )
+
+        XCTAssertEqual(evaluation.state.currentCount, 4)
+        XCTAssertEqual(evaluation.state.bestCount, 4)
+        XCTAssertEqual(evaluation.state.lastQualifiedDay, yesterday)
+        XCTAssertFalse(evaluation.isQualifiedToday)
+    }
+
+    func testStreakStaysQualifiedAfterEarningThenBecomingUnqualified() {
+        let today = calendar.startOfDay(for: now)
+        let state = StreakState(
+            mode: .noOverdue,
+            listID: "list-1",
+            currentCount: 7,
+            bestCount: 7,
+            lastQualifiedDay: today
+        )
+
+        let evaluation = engine.evaluate(
+            state: state,
+            listID: "list-1",
+            snapshot: StreakSnapshot(incompleteReminders: [
+                StreakReminder(dueDate: now.addingTimeInterval(-60), dueDateIncludesTime: true),
+            ]),
+            now: now,
+            calendar: calendar
+        )
+
+        XCTAssertEqual(evaluation.state.currentCount, 7)
+        XCTAssertEqual(evaluation.state.bestCount, 7)
+        XCTAssertEqual(evaluation.state.lastQualifiedDay, today)
+        XCTAssertTrue(evaluation.isQualifiedToday)
+    }
+
+    func testStreakResetsWhenLastQualifiedDayIsOlderAndTodayNotYet() {
+        let state = StreakState(
+            mode: .emptyList,
+            listID: "list-1",
+            currentCount: 4,
+            bestCount: 4,
+            lastQualifiedDay: calendar.date(byAdding: .day, value: -2, to: calendar.startOfDay(for: now))!
         )
 
         let evaluation = engine.evaluate(

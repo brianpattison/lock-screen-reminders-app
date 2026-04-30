@@ -91,9 +91,23 @@ struct StreakEngine {
     ) -> StreakEvaluation {
         let baseState = state.listID == listID ? state : state.reset(for: listID)
         let today = calendar.startOfDay(for: now)
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)
         let qualified = qualifies(mode: baseState.mode, snapshot: snapshot, now: now, calendar: calendar)
 
-        guard qualified else {
+        let lastQualifiedToday = baseState.lastQualifiedDay
+            .map { calendar.isDate($0, inSameDayAs: today) } ?? false
+        let lastQualifiedYesterday: Bool = {
+            guard let last = baseState.lastQualifiedDay, let yesterday else { return false }
+            return calendar.isDate(last, inSameDayAs: yesterday)
+        }()
+
+        if !qualified {
+            if lastQualifiedToday {
+                return StreakEvaluation(state: baseState, isQualifiedToday: true)
+            }
+            if lastQualifiedYesterday {
+                return StreakEvaluation(state: baseState, isQualifiedToday: false)
+            }
             return StreakEvaluation(
                 state: StreakState(
                     mode: baseState.mode,
@@ -106,22 +120,11 @@ struct StreakEngine {
             )
         }
 
-        guard let lastQualifiedDay = baseState.lastQualifiedDay else {
-            return qualifiedEvaluation(from: baseState, currentCount: 1, today: today)
-        }
-
-        if calendar.isDate(lastQualifiedDay, inSameDayAs: today) {
+        if lastQualifiedToday {
             return StreakEvaluation(state: baseState, isQualifiedToday: true)
         }
 
-        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)
-        let currentCount: Int
-        if let yesterday, calendar.isDate(lastQualifiedDay, inSameDayAs: yesterday) {
-            currentCount = baseState.currentCount + 1
-        } else {
-            currentCount = 1
-        }
-
+        let currentCount = lastQualifiedYesterday ? baseState.currentCount + 1 : 1
         return qualifiedEvaluation(from: baseState, currentCount: currentCount, today: today)
     }
 
