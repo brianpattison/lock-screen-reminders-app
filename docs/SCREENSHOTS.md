@@ -25,8 +25,8 @@ Use habit-style reminders so the streak feature makes sense:
   - `Take vitamins`
   - `Walk 10 minutes`
   - `Read 10 pages`
-- Streak goal: `No Overdue`
-- Screenshot streak state: `7-day streak`, best `12 days`
+- Streak goal: `Complete All`
+- Screenshot streak state: `7-day streak`, best `12 days`, with today's reminders still pending
 
 ## Setup
 
@@ -65,12 +65,12 @@ xcrun simctl privacy "$PHONE" grant reminders "$APP_ID"
 xcrun simctl privacy "$IPAD" grant reminders "$APP_ID"
 
 xcrun simctl status_bar "$PHONE" override \
-  --time "2026-04-30T09:41:00-05:00" \
+  --time 9:41 \
   --batteryState charged --batteryLevel 100 \
   --wifiBars 3 --cellularBars 4
 
 xcrun simctl status_bar "$IPAD" override \
-  --time "2026-04-30T09:41:00-05:00" \
+  --time 9:41 \
   --batteryState charged --batteryLevel 100 \
   --wifiBars 3 --cellularBars 4
 ```
@@ -94,9 +94,9 @@ The simplest reliable path is manual setup in Simulator:
 3. Add the three reminders listed above.
 4. Launch `Lock Screen`.
 5. In the app settings sheet, choose `Daily Routine`.
-6. Leave the streak goal as `No Overdue`.
+6. Set the streak goal to `Complete All`.
 
-After selecting the list, set the streak defaults so the app shows `7-day streak` on launch. Run this once per device:
+After selecting the list, set the streak defaults so the app shows `7-day streak` on launch. `Complete All` still uses the stored raw value `emptyList`. Run this once per device:
 
 ```bash
 DEVICE="$PHONE" # then repeat with DEVICE="$IPAD"
@@ -105,14 +105,14 @@ PREF="$GROUP/Library/Preferences/group.com.brianpattison.RemindersWidget.plist"
 LIST_ID=$(/usr/libexec/PlistBuddy -c "Print :selectedListID" "$PREF")
 YESTERDAY=$(date -v-1d -v0H -v0M -v0S +%s)
 
-/usr/libexec/PlistBuddy -c "Set :streakMode noOverdue" "$PREF" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :streakMode string noOverdue" "$PREF"
+/usr/libexec/PlistBuddy -c "Set :streakMode emptyList" "$PREF" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :streakMode string emptyList" "$PREF"
 /usr/libexec/PlistBuddy -c "Set :streakListID $LIST_ID" "$PREF" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :streakListID string $LIST_ID" "$PREF"
-/usr/libexec/PlistBuddy -c "Set :streakCurrentCount 6" "$PREF" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :streakCurrentCount integer 6" "$PREF"
+/usr/libexec/PlistBuddy -c "Set :streakCurrentCount 7" "$PREF" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :streakCurrentCount integer 7" "$PREF"
 /usr/libexec/PlistBuddy -c "Set :streakBestCount 12" "$PREF" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :streakBestCount integer 12" "$PREF"
 /usr/libexec/PlistBuddy -c "Set :streakLastQualifiedDay $YESTERDAY" "$PREF" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :streakLastQualifiedDay real $YESTERDAY" "$PREF"
 ```
 
-The app should extend the `6` stored count to `7` when it launches and sees no overdue reminders.
+The app should keep the `7-day streak` count and show `Complete all reminders today.` until the sample reminders are completed.
 
 ## Capture App Screens
 
