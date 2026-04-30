@@ -225,6 +225,286 @@ final class StreakTests: XCTestCase {
         XCTAssertEqual(evaluation.state.currentCount, 1)
         XCTAssertEqual(evaluation.state.bestCount, 9)
     }
+
+    // MARK: - History-based evaluate (backfill)
+
+    private func startOfDay(_ date: Date) -> Date { calendar.startOfDay(for: date) }
+    private func dayOffset(_ days: Int) -> Date {
+        calendar.date(byAdding: .day, value: days, to: startOfDay(now))!
+    }
+    private func hourOffset(_ hours: Int, from base: Date) -> Date {
+        calendar.date(byAdding: .hour, value: hours, to: base)!
+    }
+
+    func testHistoryBackfillEmptyListAcrossInactiveGap() {
+        let state = StreakState(
+            mode: .emptyList,
+            listID: "list-1",
+            currentCount: 4,
+            bestCount: 4,
+            lastQualifiedDay: dayOffset(-2)
+        )
+        let history = StreakHistory(reminders: [])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.currentCount, 6)
+        XCTAssertEqual(evaluation.state.bestCount, 6)
+        XCTAssertEqual(evaluation.state.lastQualifiedDay, startOfDay(now))
+        XCTAssertTrue(evaluation.isQualifiedToday)
+    }
+
+    func testHistoryBackfillEmptyListBreaksWhenReminderWasIncomplete() {
+        let state = StreakState(
+            mode: .emptyList,
+            listID: "list-1",
+            currentCount: 4,
+            bestCount: 4,
+            lastQualifiedDay: dayOffset(-2)
+        )
+        let history = StreakHistory(reminders: [
+            StreakHistoryReminder(creationDate: dayOffset(-1), completionDate: nil),
+        ])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.currentCount, 0)
+        XCTAssertEqual(evaluation.state.bestCount, 4)
+        XCTAssertNil(evaluation.state.lastQualifiedDay)
+        XCTAssertFalse(evaluation.isQualifiedToday)
+    }
+
+    func testHistoryBackfillEmptyListCreditsDayWithBriefIncompleteWindow() {
+        // Reminder existed only from noon to 3pm yesterday; list was empty the rest of the day.
+        let yesterdayNoon = hourOffset(12, from: dayOffset(-1))
+        let yesterday3pm = hourOffset(15, from: dayOffset(-1))
+        let state = StreakState(
+            mode: .emptyList,
+            listID: "list-1",
+            currentCount: 2,
+            bestCount: 2,
+            lastQualifiedDay: dayOffset(-2)
+        )
+        let history = StreakHistory(reminders: [
+            StreakHistoryReminder(creationDate: yesterdayNoon, completionDate: yesterday3pm),
+        ])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.currentCount, 4)
+        XCTAssertTrue(evaluation.isQualifiedToday)
+    }
+
+    func testHistoryBackfillDailyProgressViaCompletion() {
+        let yesterdayNoon = hourOffset(12, from: dayOffset(-1))
+        let state = StreakState(
+            mode: .dailyProgress,
+            listID: "list-1",
+            currentCount: 3,
+            bestCount: 3,
+            lastQualifiedDay: dayOffset(-2)
+        )
+        // Reminder created 3 days ago, completed yesterday at noon. List empty rest of the time.
+        let history = StreakHistory(reminders: [
+            StreakHistoryReminder(creationDate: dayOffset(-3), completionDate: yesterdayNoon),
+        ])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.currentCount, 5)
+        XCTAssertTrue(evaluation.isQualifiedToday)
+    }
+
+    func testHistoryBackfillDailyProgressBreaksOnGapDayWithoutCompletionOrEmpty() {
+        // Reminder created 2 days ago, never completed. Yesterday: list non-empty, no completion.
+        let state = StreakState(
+            mode: .dailyProgress,
+            listID: "list-1",
+            currentCount: 3,
+            bestCount: 5,
+            lastQualifiedDay: dayOffset(-2)
+        )
+        let history = StreakHistory(reminders: [
+            StreakHistoryReminder(creationDate: dayOffset(-2), completionDate: nil),
+        ])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.currentCount, 0)
+        XCTAssertEqual(evaluation.state.bestCount, 5)
+        XCTAssertNil(evaluation.state.lastQualifiedDay)
+        XCTAssertFalse(evaluation.isQualifiedToday)
+    }
+
+    func testHistoryBackfillNoOverdueWithOverdueReminderDuringGap() {
+        let twoDaysAgoNoon = hourOffset(12, from: dayOffset(-2))
+        let state = StreakState(
+            mode: .noOverdue,
+            listID: "list-1",
+            currentCount: 5,
+            bestCount: 5,
+            lastQualifiedDay: dayOffset(-3)
+        )
+        // Reminder due 2 days ago at noon, never completed. Becomes overdue at noon day -2 onward.
+        let history = StreakHistory(reminders: [
+            StreakHistoryReminder(
+                creationDate: dayOffset(-3),
+                completionDate: nil,
+                dueDate: twoDaysAgoNoon,
+                dueDateIncludesTime: true
+            ),
+        ])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.currentCount, 0)
+        XCTAssertEqual(evaluation.state.bestCount, 5)
+        XCTAssertNil(evaluation.state.lastQualifiedDay)
+        XCTAssertFalse(evaluation.isQualifiedToday)
+    }
+
+    func testHistoryBackfillNoOverdueIgnoresUndatedReminders() {
+        let state = StreakState(
+            mode: .noOverdue,
+            listID: "list-1",
+            currentCount: 1,
+            bestCount: 1,
+            lastQualifiedDay: dayOffset(-1)
+        )
+        let history = StreakHistory(reminders: [
+            StreakHistoryReminder(creationDate: dayOffset(-2), completionDate: nil, dueDate: nil),
+        ])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.currentCount, 2)
+        XCTAssertTrue(evaluation.isQualifiedToday)
+    }
+
+    func testHistoryNoOverdueAllDayReminderDueTodayNotOverdue() {
+        let state = StreakState(
+            mode: .noOverdue,
+            listID: "list-1",
+            currentCount: 1,
+            bestCount: 1,
+            lastQualifiedDay: dayOffset(-1)
+        )
+        let history = StreakHistory(reminders: [
+            StreakHistoryReminder(
+                creationDate: dayOffset(-1),
+                completionDate: nil,
+                dueDate: startOfDay(now),
+                dueDateIncludesTime: false
+            ),
+        ])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.currentCount, 2)
+        XCTAssertTrue(evaluation.isQualifiedToday)
+    }
+
+    func testHistoryEvaluateWithoutLastQualifiedDayDoesNoBackfill() {
+        let state = StreakState(
+            mode: .emptyList,
+            listID: "list-1",
+            currentCount: 0,
+            bestCount: 5,
+            lastQualifiedDay: nil
+        )
+        let history = StreakHistory(reminders: [])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.currentCount, 1)
+        XCTAssertEqual(evaluation.state.bestCount, 5)
+        XCTAssertEqual(evaluation.state.lastQualifiedDay, startOfDay(now))
+        XCTAssertTrue(evaluation.isQualifiedToday)
+    }
+
+    func testHistoryTodayQualifiesViaEarlierCompletionDespiteCurrentNonEmpty() {
+        let earlierToday = hourOffset(5, from: startOfDay(now))
+        let state = StreakState(
+            mode: .dailyProgress,
+            listID: "list-1",
+            currentCount: 2,
+            bestCount: 2,
+            lastQualifiedDay: dayOffset(-1)
+        )
+        let history = StreakHistory(reminders: [
+            StreakHistoryReminder(creationDate: dayOffset(-1), completionDate: earlierToday),
+            StreakHistoryReminder(creationDate: earlierToday, completionDate: nil),
+        ])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.currentCount, 3)
+        XCTAssertTrue(evaluation.isQualifiedToday)
+    }
+
+    func testHistoryTodayQualifiesEmptyListViaEarlierEmptyMoment() {
+        let fourAm = hourOffset(4, from: startOfDay(now))
+        let sevenAm = hourOffset(7, from: startOfDay(now))
+        let state = StreakState(
+            mode: .emptyList,
+            listID: "list-1",
+            currentCount: 2,
+            bestCount: 2,
+            lastQualifiedDay: dayOffset(-1)
+        )
+        // List was non-empty until 4am (R1 completed), empty until 7am (R2 created), then non-empty.
+        let history = StreakHistory(reminders: [
+            StreakHistoryReminder(creationDate: dayOffset(-1), completionDate: fourAm),
+            StreakHistoryReminder(creationDate: sevenAm, completionDate: nil),
+        ])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.currentCount, 3)
+        XCTAssertTrue(evaluation.isQualifiedToday)
+    }
+
+    func testHistoryEvaluatePreservesBestCountAcrossListSwitch() {
+        let state = StreakState(
+            mode: .emptyList,
+            listID: "list-1",
+            currentCount: 4,
+            bestCount: 9,
+            lastQualifiedDay: dayOffset(-1)
+        )
+        let history = StreakHistory(reminders: [])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-2", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.listID, "list-2")
+        XCTAssertEqual(evaluation.state.currentCount, 1)
+        XCTAssertEqual(evaluation.state.bestCount, 9)
+    }
+
+    func testQualifiesOnDayDailyProgressEmptyWithIncompleteReminder() {
+        let twoDaysAgoNoon = hourOffset(12, from: dayOffset(-2))
+        let history = StreakHistory(reminders: [
+            StreakHistoryReminder(creationDate: twoDaysAgoNoon, completionDate: nil),
+        ])
+
+        let yesterdayQualifies = engine.qualifiesOnDay(
+            mode: .dailyProgress,
+            history: history,
+            dayStart: dayOffset(-1),
+            dayEnd: startOfDay(now),
+            calendar: calendar
+        )
+        XCTAssertFalse(yesterdayQualifies)
+
+        let twoDaysAgoQualifies = engine.qualifiesOnDay(
+            mode: .dailyProgress,
+            history: history,
+            dayStart: dayOffset(-2),
+            dayEnd: dayOffset(-1),
+            calendar: calendar
+        )
+        XCTAssertTrue(twoDaysAgoQualifies)
+    }
 }
 
 final class StreakStoreTests: XCTestCase {

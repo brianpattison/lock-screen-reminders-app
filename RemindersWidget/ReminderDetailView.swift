@@ -186,22 +186,37 @@ struct ReminderDetailView: View {
     @MainActor private func fetchReminders() {
         fetchTask?.cancel()
         fetchTask = Task {
-            guard let result = await fetchReminderSnapshot() else {
+            let storedState = StreakStore().state
+            guard let result = await fetchReminderHistory(storedLastQualifiedDay: storedState.lastQualifiedDay) else {
                 guard !Task.isCancelled else { return }
                 reminders = []
                 return
             }
 
             let items = result.incompleteReminders.map(\.reminderItem)
-            let snapshot = StreakSnapshot(
-                incompleteReminders: result.incompleteReminders.map(\.streakReminder),
-                completedTodayCount: result.completedTodayCount
-            )
-            let evaluation = StreakEngine().evaluate(
-                state: StreakStore().state,
-                listID: listID,
-                snapshot: snapshot
-            )
+            let evaluation: StreakEvaluation
+
+            if listID == SelectedListStore.todayID {
+                let snapshot = StreakSnapshot(
+                    incompleteReminders: result.incompleteReminders.map(\.streakReminder),
+                    completedTodayCount: result.completedTodayInScopeCount
+                )
+                evaluation = StreakEngine().evaluate(
+                    state: storedState,
+                    listID: listID,
+                    snapshot: snapshot
+                )
+            } else {
+                let history = StreakHistory(
+                    reminders: result.incompleteReminders.map(\.streakHistoryReminder)
+                        + result.completedReminders.map(\.streakHistoryReminder)
+                )
+                evaluation = StreakEngine().evaluate(
+                    state: storedState,
+                    listID: listID,
+                    history: history
+                )
+            }
 
             guard !Task.isCancelled else { return }
             reminders = sortReminders(items)
@@ -212,9 +227,13 @@ struct ReminderDetailView: View {
         }
     }
 
-    private func fetchReminderSnapshot() async -> ReminderFetchResult? {
+    private func fetchReminderHistory(storedLastQualifiedDay: Date?) async -> ReminderFetchResult? {
         let startOfDay = Calendar.current.startOfDay(for: Date())
         let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        let lookbackStart: Date = {
+            guard let last = storedLastQualifiedDay, last < startOfDay else { return startOfDay }
+            return last
+        }()
 
         let selectedCalendars: [EKCalendar]?
         let incompletePredicate: NSPredicate
@@ -241,19 +260,27 @@ struct ReminderDetailView: View {
 
         let incompleteReminders = await fetchReminders(matching: incompletePredicate)
         let completedPredicate = eventStore.predicateForCompletedReminders(
-            withCompletionDateStarting: startOfDay,
+            withCompletionDateStarting: lookbackStart,
             ending: endOfDay,
             calendars: selectedCalendars
         )
-        var completedReminders = await fetchReminders(matching: completedPredicate)
+        let completedReminders = await fetchReminders(matching: completedPredicate)
 
-        if listID == SelectedListStore.todayID {
-            completedReminders = completedReminders.filter { $0.isInTodayScope(endingAt: endOfDay) }
-        }
+        let completedTodayInScopeCount: Int = {
+            let todayCompletions = completedReminders.filter { reminder in
+                guard let completionDate = reminder.completionDate else { return false }
+                return completionDate >= startOfDay && completionDate < endOfDay
+            }
+            if listID == SelectedListStore.todayID {
+                return todayCompletions.filter { $0.isInTodayScope(endingAt: endOfDay) }.count
+            }
+            return todayCompletions.count
+        }()
 
         return ReminderFetchResult(
             incompleteReminders: incompleteReminders,
-            completedTodayCount: completedReminders.count
+            completedReminders: completedReminders,
+            completedTodayInScopeCount: completedTodayInScopeCount
         )
     }
 
@@ -268,5 +295,6 @@ struct ReminderDetailView: View {
 
 private struct ReminderFetchResult {
     let incompleteReminders: [EKReminder]
-    let completedTodayCount: Int
+    let completedReminders: [EKReminder]
+    let completedTodayInScopeCount: Int
 }
