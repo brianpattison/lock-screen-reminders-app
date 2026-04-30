@@ -70,7 +70,7 @@ struct StreakState: Equatable {
             mode: mode ?? self.mode,
             listID: listID,
             currentCount: 0,
-            bestCount: 0,
+            bestCount: bestCount,
             lastQualifiedDay: nil
         )
     }

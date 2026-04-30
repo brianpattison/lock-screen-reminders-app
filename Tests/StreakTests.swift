@@ -136,7 +136,7 @@ final class StreakTests: XCTestCase {
         XCTAssertFalse(evaluation.isQualifiedToday)
     }
 
-    func testResetForListOrModeClearsCurrentAndBestCounts() {
+    func testResetForListOrModeClearsCurrentButPreservesBestCount() {
         let state = StreakState(
             mode: .noOverdue,
             listID: "old-list",
@@ -150,8 +150,30 @@ final class StreakTests: XCTestCase {
         XCTAssertEqual(reset.mode, .dailyProgress)
         XCTAssertEqual(reset.listID, "new-list")
         XCTAssertEqual(reset.currentCount, 0)
-        XCTAssertEqual(reset.bestCount, 0)
+        XCTAssertEqual(reset.bestCount, 8)
         XCTAssertNil(reset.lastQualifiedDay)
+    }
+
+    func testEvaluatePreservesBestCountWhenSwitchingLists() {
+        let state = StreakState(
+            mode: .emptyList,
+            listID: "list-1",
+            currentCount: 3,
+            bestCount: 9,
+            lastQualifiedDay: calendar.startOfDay(for: now)
+        )
+
+        let evaluation = engine.evaluate(
+            state: state,
+            listID: "list-2",
+            snapshot: StreakSnapshot(incompleteReminders: []),
+            now: now,
+            calendar: calendar
+        )
+
+        XCTAssertEqual(evaluation.state.listID, "list-2")
+        XCTAssertEqual(evaluation.state.currentCount, 1)
+        XCTAssertEqual(evaluation.state.bestCount, 9)
     }
 }
 
