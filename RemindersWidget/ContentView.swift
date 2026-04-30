@@ -110,14 +110,6 @@ struct ContentView: View {
     private var settingsSheet: some View {
         NavigationStack {
             VStack(spacing: 24) {
-                Spacer()
-
-                ReminderListIcon()
-
-                Text("Lock Screen Reminders")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-
                 Group {
                     switch authStatus {
                     case .fullAccess:
@@ -132,8 +124,10 @@ struct ContentView: View {
                 .padding(.horizontal, 32)
 
                 Spacer()
-                Spacer()
             }
+            .padding(.top, 24)
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
