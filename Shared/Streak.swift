@@ -151,6 +151,7 @@ struct StreakEngine {
 
         var runningCount = baseState.currentCount
         var runningLastQualified = normalizedLastQualified
+        var peakBest = baseState.bestCount
 
         if let last = normalizedLastQualified,
            let firstGapDay = calendar.date(byAdding: .day, value: 1, to: last) {
@@ -172,6 +173,7 @@ struct StreakEngine {
                     }()
                     runningCount = continuesStreak ? runningCount + 1 : 1
                     runningLastQualified = dayCursor
+                    peakBest = max(peakBest, runningCount)
                 } else {
                     runningCount = 0
                     runningLastQualified = nil
@@ -192,8 +194,18 @@ struct StreakEngine {
             calendar: calendar
         )
 
+        // Hoist any peak the walk discovered into baseState.bestCount so finalize preserves it
+        // even when the walk failed mid-stream and runningCount is now smaller than the peak.
+        let baseWithWalkPeak = StreakState(
+            mode: baseState.mode,
+            listID: baseState.listID,
+            currentCount: baseState.currentCount,
+            bestCount: peakBest,
+            lastQualifiedDay: baseState.lastQualifiedDay
+        )
+
         return finalize(
-            baseState: baseState,
+            baseState: baseWithWalkPeak,
             listID: listID,
             runningCount: runningCount,
             runningLastQualified: runningLastQualified,
