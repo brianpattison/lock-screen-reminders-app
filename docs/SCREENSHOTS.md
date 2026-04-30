@@ -21,7 +21,7 @@ The `6.5` filenames are historical. Keep the filenames stable unless the website
 Use habit-style reminders so the streak feature makes sense:
 
 - List: `Daily Routine`
-- Reminders:
+- Reminders, each set to repeat `Daily`:
   - `Take vitamins`
   - `Walk 10 minutes`
   - `Read 10 pages`
@@ -87,34 +87,19 @@ xcrun simctl install "$IPAD" "$APP"
 
 ## Seed The Simulator
 
-The simplest reliable path is manual setup in Simulator:
-
-1. Open Reminders in each simulator.
-2. Create the `Daily Routine` list.
-3. Add the three reminders listed above.
-4. Launch `Lock Screen`.
-5. In the app settings sheet, choose `Daily Routine`.
-6. Set the streak goal to `Complete All`.
-
-After selecting the list, set the streak defaults so the app shows `7-day streak` on launch. `Complete All` still uses the stored raw value `emptyList`. Run this once per device:
+Use the debug screenshot seed launch flag. It creates the `Daily Routine` list, adds the three sample reminders, sets each reminder to repeat `Daily`, selects the list, and sets the screenshot streak state:
 
 ```bash
-DEVICE="$PHONE" # then repeat with DEVICE="$IPAD"
-GROUP=$(xcrun simctl get_app_container "$DEVICE" "$APP_ID" groups | awk '/group.com.brianpattison.RemindersWidget/{print $2}')
-PREF="$GROUP/Library/Preferences/group.com.brianpattison.RemindersWidget.plist"
-LIST_ID=$(/usr/libexec/PlistBuddy -c "Print :selectedListID" "$PREF")
-YESTERDAY=$(date -v-1d -v0H -v0M -v0S +%s)
-
-/usr/libexec/PlistBuddy -c "Set :streakMode emptyList" "$PREF" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :streakMode string emptyList" "$PREF"
-/usr/libexec/PlistBuddy -c "Set :streakListID $LIST_ID" "$PREF" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :streakListID string $LIST_ID" "$PREF"
-/usr/libexec/PlistBuddy -c "Set :streakCurrentCount 7" "$PREF" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :streakCurrentCount integer 7" "$PREF"
-/usr/libexec/PlistBuddy -c "Set :streakBestCount 12" "$PREF" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :streakBestCount integer 12" "$PREF"
-/usr/libexec/PlistBuddy -c "Set :streakLastQualifiedDay $YESTERDAY" "$PREF" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :streakLastQualifiedDay real $YESTERDAY" "$PREF"
+xcrun simctl launch --terminate-running-process "$PHONE" "$APP_ID" --seed-screenshots
+xcrun simctl launch --terminate-running-process "$IPAD" "$APP_ID" --seed-screenshots
+sleep 5
 ```
 
-The app should keep the `7-day streak` count and show `Complete all reminders today.` until the sample reminders are completed.
+The app should keep the `7-day streak` count, show `Complete all reminders today.`, and display `Today` plus a `Daily` recurrence label under each sample reminder until they are completed.
 
 ## Capture App Screens
+
+Before capturing, confirm the list view shows a `Daily` recurrence label under each reminder.
 
 Launch normally for the list view:
 
@@ -128,10 +113,12 @@ sleep 2
 xcrun simctl io "$IPAD" screenshot docs/screenshot-list-view-ipad-13.png
 ```
 
-For the settings screenshots, open the app and tap the gear button, then capture:
+For the settings screenshots, open the app and tap the gear button, then capture. On iPad, use the screenshot settings flag so the sheet opens over the seeded list with the recurring labels visible in the dimmed background:
 
 ```bash
 xcrun simctl io "$PHONE" screenshot docs/screenshot-list-selection-6.5.png
+xcrun simctl launch --terminate-running-process "$IPAD" "$APP_ID" --seed-screenshots --show-settings-screenshot
+sleep 5
 xcrun simctl io "$IPAD" screenshot docs/screenshot-list-selection-ipad-13.png
 ```
 
