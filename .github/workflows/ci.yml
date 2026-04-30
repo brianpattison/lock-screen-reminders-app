@@ -34,14 +34,6 @@ jobs:
       - name: Validate Swift formatting
         run: swift-format lint --configuration .swift-format --recursive --parallel --strict RemindersWidget RemindersWidgetExtension Shared Tests
 
-      - name: Install SwiftLint
-        if: ${{ hashFiles('.swiftlint.yml', '.swiftlint.yaml') != '' }}
-        run: brew install swiftlint
-
-      - name: Run SwiftLint
-        if: ${{ hashFiles('.swiftlint.yml', '.swiftlint.yaml') != '' }}
-        run: swiftlint lint --strict
-
       - name: Select test simulator
         run: |
           set -euo pipefail
