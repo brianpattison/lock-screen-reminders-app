@@ -201,13 +201,12 @@ struct ReminderDetailView: View {
                     snapshot: snapshot
                 )
             } else {
-                let historyCreationFallback = Date()
                 let history = StreakHistory(
                     reminders: result.incompleteReminders.map {
-                        $0.streakHistoryReminder(creationDateFallback: historyCreationFallback)
+                        $0.streakHistoryReminder(creationDateFallback: result.historyCreationFallback)
                     }
                         + result.completedReminders.map {
-                            $0.streakHistoryReminder(creationDateFallback: historyCreationFallback)
+                            $0.streakHistoryReminder(creationDateFallback: result.historyCreationFallback)
                         }
                 )
                 evaluation = StreakEngine().evaluate(
@@ -279,6 +278,7 @@ struct ReminderDetailView: View {
         return ReminderFetchResult(
             incompleteReminders: incompleteReminders,
             completedReminders: completedReminders,
+            historyCreationFallback: lookbackStart,
             completedTodayInScopeCount: completedTodayInScopeCount
         )
     }
@@ -295,5 +295,6 @@ struct ReminderDetailView: View {
 private struct ReminderFetchResult {
     let incompleteReminders: [EKReminder]
     let completedReminders: [EKReminder]
+    let historyCreationFallback: Date
     let completedTodayInScopeCount: Int
 }
