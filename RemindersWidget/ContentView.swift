@@ -1,7 +1,7 @@
 import EventKit
 import SwiftUI
 #if DEBUG
-import UIKit
+    import UIKit
 #endif
 import WidgetKit
 
@@ -14,9 +14,9 @@ struct ContentView: View {
     @State private var showSettings = false
     @State private var previewReminders: [ReminderItem] = []
     @State private var previewFetchTask: Task<Void, Never>?
-#if DEBUG
-    @State private var screenshotSeedTask: Task<Void, Never>?
-#endif
+    #if DEBUG
+        @State private var screenshotSeedTask: Task<Void, Never>?
+    #endif
     @State private var streakState: StreakState = .empty
     @State private var pendingStreakChange: PendingStreakChange?
     @State private var showStreakResetConfirmation = false
@@ -53,12 +53,12 @@ struct ContentView: View {
             settingsSheet
         }
         .onAppear {
-#if DEBUG
-            if shouldSeedScreenshots {
-                seedScreenshotData()
-                return
-            }
-#endif
+            #if DEBUG
+                if shouldSeedScreenshots {
+                    seedScreenshotData()
+                    return
+                }
+            #endif
             authStatus = EKEventStore.authorizationStatus(for: .reminder)
             loadStreakState()
             if authStatus == .fullAccess {
@@ -68,11 +68,11 @@ struct ContentView: View {
             if selectedListID == nil || authStatus != .fullAccess {
                 showSettings = true
             }
-#if DEBUG
-            if shouldShowSettingsForScreenshots {
-                showSettings = true
-            }
-#endif
+            #if DEBUG
+                if shouldShowSettingsForScreenshots {
+                    showSettings = true
+                }
+            #endif
         }
         .onChange(of: scenePhase) { _, newPhase in
             // The user can grant Reminders access from system Settings while we're backgrounded.
@@ -451,39 +451,39 @@ struct ContentView: View {
         }
     }
 
-#if DEBUG
-    private var shouldSeedScreenshots: Bool {
-        ProcessInfo.processInfo.arguments.contains("--seed-screenshots")
-    }
+    #if DEBUG
+        private var shouldSeedScreenshots: Bool {
+            ProcessInfo.processInfo.arguments.contains("--seed-screenshots")
+        }
 
-    private var shouldShowSettingsForScreenshots: Bool {
-        ProcessInfo.processInfo.arguments.contains("--show-settings-screenshot")
-    }
+        private var shouldShowSettingsForScreenshots: Bool {
+            ProcessInfo.processInfo.arguments.contains("--show-settings-screenshot")
+        }
 
-    @MainActor private func seedScreenshotData() {
-        guard screenshotSeedTask == nil else { return }
+        @MainActor private func seedScreenshotData() {
+            guard screenshotSeedTask == nil else { return }
 
-        screenshotSeedTask = Task { @MainActor in
-            do {
-                authStatus = try await ScreenshotSeed.run(eventStore: eventStore)
-                loadStreakState()
-                loadLists()
-                loadSelectedList()
-                showSettings = shouldShowSettingsForScreenshots
-                WidgetCenter.shared.reloadAllTimelines()
-            } catch {
-                authStatus = EKEventStore.authorizationStatus(for: .reminder)
-                if authStatus == .fullAccess {
+            screenshotSeedTask = Task { @MainActor in
+                do {
+                    authStatus = try await ScreenshotSeed.run(eventStore: eventStore)
+                    loadStreakState()
                     loadLists()
                     loadSelectedList()
+                    showSettings = shouldShowSettingsForScreenshots
+                    WidgetCenter.shared.reloadAllTimelines()
+                } catch {
+                    authStatus = EKEventStore.authorizationStatus(for: .reminder)
+                    if authStatus == .fullAccess {
+                        loadLists()
+                        loadSelectedList()
+                    }
+                    showSettings = selectedListID == nil || authStatus != .fullAccess
                 }
-                showSettings = selectedListID == nil || authStatus != .fullAccess
-            }
 
-            screenshotSeedTask = nil
+                screenshotSeedTask = nil
+            }
         }
-    }
-#endif
+    #endif
 }
 
 private enum PendingStreakChange {
@@ -492,97 +492,100 @@ private enum PendingStreakChange {
 }
 
 #if DEBUG
-private enum ScreenshotSeed {
-    private static let listTitle = "Daily Routine"
-    private static let reminderTitles = ["Take vitamins", "Walk 10 minutes", "Read 10 pages"]
+    private enum ScreenshotSeed {
+        private static let listTitle = "Daily Routine"
+        private static let reminderTitles = ["Take vitamins", "Walk 10 minutes", "Read 10 pages"]
 
-    enum SeedError: Error {
-        case remindersAccessUnavailable
-        case missingReminderSource
-    }
-
-    @MainActor static func run(eventStore: EKEventStore) async throws -> EKAuthorizationStatus {
-        var status = EKEventStore.authorizationStatus(for: .reminder)
-        if status != .fullAccess {
-            _ = try? await eventStore.requestFullAccessToReminders()
-            status = EKEventStore.authorizationStatus(for: .reminder)
-        }
-        guard status == .fullAccess else { throw SeedError.remindersAccessUnavailable }
-
-        let calendar = try ensureCalendar(in: eventStore)
-        let existing = await fetchReminders(in: calendar, eventStore: eventStore)
-        for reminder in existing where reminderTitles.contains(reminder.title ?? "") {
-            try eventStore.remove(reminder, commit: true)
+        enum SeedError: Error {
+            case remindersAccessUnavailable
+            case missingReminderSource
         }
 
-        for title in reminderTitles {
-            let reminder = EKReminder(eventStore: eventStore)
-            reminder.title = title
-            reminder.calendar = calendar
+        @MainActor static func run(eventStore: EKEventStore) async throws -> EKAuthorizationStatus {
+            var status = EKEventStore.authorizationStatus(for: .reminder)
+            if status != .fullAccess {
+                _ = try? await eventStore.requestFullAccessToReminders()
+                status = EKEventStore.authorizationStatus(for: .reminder)
+            }
+            guard status == .fullAccess else { throw SeedError.remindersAccessUnavailable }
 
-            var dueDate = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-            dueDate.calendar = Calendar.current
-            reminder.dueDateComponents = dueDate
+            let calendar = try ensureCalendar(in: eventStore)
+            let existing = await fetchReminders(in: calendar, eventStore: eventStore)
+            for reminder in existing where reminderTitles.contains(reminder.title ?? "") {
+                try eventStore.remove(reminder, commit: true)
+            }
 
-            let recurrence = EKRecurrenceRule(recurrenceWith: .daily, interval: 1, end: nil)
-            reminder.addRecurrenceRule(recurrence)
+            for title in reminderTitles {
+                let reminder = EKReminder(eventStore: eventStore)
+                reminder.title = title
+                reminder.calendar = calendar
 
-            try eventStore.save(reminder, commit: true)
+                var dueDate = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+                dueDate.calendar = Calendar.current
+                reminder.dueDateComponents = dueDate
+
+                let recurrence = EKRecurrenceRule(recurrenceWith: .daily, interval: 1, end: nil)
+                reminder.addRecurrenceRule(recurrence)
+
+                try eventStore.save(reminder, commit: true)
+            }
+
+            var selectedListStore = SelectedListStore()
+            selectedListStore.selectedListID = calendar.calendarIdentifier
+            selectedListStore.selectedListTitle = calendar.title
+
+            var streakStore = StreakStore()
+            let yesterday = Calendar.current.date(
+                byAdding: .day,
+                value: -1,
+                to: Calendar.current.startOfDay(for: Date())
+            )
+            streakStore.state = StreakState(
+                mode: .emptyList,
+                listID: calendar.calendarIdentifier,
+                currentCount: 7,
+                bestCount: 12,
+                lastQualifiedDay: yesterday
+            )
+
+            UserDefaults(suiteName: "group.com.brianpattison.RemindersWidget")?.synchronize()
+            return status
         }
 
-        var selectedListStore = SelectedListStore()
-        selectedListStore.selectedListID = calendar.calendarIdentifier
-        selectedListStore.selectedListTitle = calendar.title
+        @MainActor private static func ensureCalendar(in eventStore: EKEventStore) throws -> EKCalendar {
+            if let calendar = eventStore.calendars(for: .reminder)
+                .first(where: { $0.title == listTitle && $0.allowsContentModifications })
+            {
+                return calendar
+            }
 
-        var streakStore = StreakStore()
-        let yesterday = Calendar.current.date(
-            byAdding: .day,
-            value: -1,
-            to: Calendar.current.startOfDay(for: Date())
-        )
-        streakStore.state = StreakState(
-            mode: .emptyList,
-            listID: calendar.calendarIdentifier,
-            currentCount: 7,
-            bestCount: 12,
-            lastQualifiedDay: yesterday
-        )
+            guard
+                let source = eventStore.defaultCalendarForNewReminders()?.source
+                    ?? eventStore.sources.first(where: { $0.sourceType == .local })
+                    ?? eventStore.sources.first
+            else {
+                throw SeedError.missingReminderSource
+            }
 
-        UserDefaults(suiteName: "group.com.brianpattison.RemindersWidget")?.synchronize()
-        return status
-    }
-
-    @MainActor private static func ensureCalendar(in eventStore: EKEventStore) throws -> EKCalendar {
-        if let calendar = eventStore.calendars(for: .reminder)
-            .first(where: { $0.title == listTitle && $0.allowsContentModifications })
-        {
+            let calendar = EKCalendar(for: .reminder, eventStore: eventStore)
+            calendar.title = listTitle
+            calendar.cgColor = UIColor.systemBlue.cgColor
+            calendar.source = source
+            try eventStore.saveCalendar(calendar, commit: true)
             return calendar
         }
 
-        guard let source = eventStore.defaultCalendarForNewReminders()?.source
-            ?? eventStore.sources.first(where: { $0.sourceType == .local })
-            ?? eventStore.sources.first
-        else {
-            throw SeedError.missingReminderSource
-        }
-
-        let calendar = EKCalendar(for: .reminder, eventStore: eventStore)
-        calendar.title = listTitle
-        calendar.cgColor = UIColor.systemBlue.cgColor
-        calendar.source = source
-        try eventStore.saveCalendar(calendar, commit: true)
-        return calendar
-    }
-
-    @MainActor private static func fetchReminders(in calendar: EKCalendar, eventStore: EKEventStore) async -> [EKReminder] {
-        let predicate = eventStore.predicateForReminders(in: [calendar])
-        return await withCheckedContinuation { continuation in
-            eventStore.fetchReminders(matching: predicate) { reminders in
-                continuation.resume(returning: reminders ?? [])
+        @MainActor private static func fetchReminders(in calendar: EKCalendar, eventStore: EKEventStore) async
+            -> [EKReminder]
+        {
+            let predicate = eventStore.predicateForReminders(in: [calendar])
+            return await withCheckedContinuation { continuation in
+                eventStore.fetchReminders(matching: predicate) { reminders in
+                    continuation.resume(returning: reminders ?? [])
+                }
             }
         }
     }
-}
 #endif
 
 private struct WidgetListSelectionView: View {
