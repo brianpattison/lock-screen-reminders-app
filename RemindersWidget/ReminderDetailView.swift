@@ -257,8 +257,9 @@ struct ReminderDetailView: View {
         }
 
         let incompleteReminders = await fetchReminders(matching: incompletePredicate)
+        let completedFetchStart = listID == SelectedListStore.todayID ? startOfDay : lookbackStart
         let completedPredicate = eventStore.predicateForCompletedReminders(
-            withCompletionDateStarting: lookbackStart,
+            withCompletionDateStarting: completedFetchStart,
             ending: endOfDay,
             calendars: selectedCalendars
         )
