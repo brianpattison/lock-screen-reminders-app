@@ -9,7 +9,7 @@ extension EKReminder {
             dueDateIncludesTime: dueDateComponents?.hasTimeComponents ?? false,
             creationDate: creationDate,
             recurrence: hasRecurrenceRules
-                ? recurrenceRules?.first.flatMap(ReminderRecurrence.init(rule:)) : nil,
+                ? recurrenceRules?.first.map(ReminderRecurrence.init(rule:)) : nil,
             calendarItemIdentifier: calendarItemIdentifier
         )
     }
@@ -44,7 +44,7 @@ private extension DateComponents {
 }
 
 extension ReminderRecurrence {
-    init?(rule: EKRecurrenceRule) {
+    init(rule: EKRecurrenceRule) {
         // Anything beyond a plain frequency+interval — specific weekdays, months, ordinal
         // positions like "first Monday" — falls back to the generic "Repeats" label rather
         // than trying to reproduce Apple's full rule formatting.

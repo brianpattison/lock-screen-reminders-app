@@ -548,7 +548,6 @@ private enum PendingStreakChange {
                 lastQualifiedDay: yesterday
             )
 
-            UserDefaults(suiteName: "group.com.brianpattison.RemindersWidget")?.synchronize()
             return status
         }
 
