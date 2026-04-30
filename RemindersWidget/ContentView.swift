@@ -303,11 +303,11 @@ struct ContentView: View {
             pendingStreakChange = .list(id: id, title: title, color: color)
             showStreakResetConfirmation = true
         } else {
-            applyListSelection(id: id, title: title, color: color, resetStreak: true)
+            applyListSelection(id: id, title: title, color: color)
         }
     }
 
-    private func applyListSelection(id: String, title: String, color: Color, resetStreak shouldResetStreak: Bool) {
+    private func applyListSelection(id: String, title: String, color: Color) {
         selectedListID = id
         selectedListTitle = title
         selectedListColor = color
@@ -316,9 +316,7 @@ struct ContentView: View {
         store.selectedListID = id
         store.selectedListTitle = title
 
-        if shouldResetStreak {
-            resetStreak(for: id)
-        }
+        resetStreak(for: id)
 
         WidgetCenter.shared.reloadAllTimelines()
         fetchPreviewReminders()
@@ -354,7 +352,7 @@ struct ContentView: View {
 
         switch pendingStreakChange {
         case let .list(id, title, color):
-            applyListSelection(id: id, title: title, color: color, resetStreak: true)
+            applyListSelection(id: id, title: title, color: color)
         case let .mode(mode):
             applyStreakModeSelection(mode)
         }
