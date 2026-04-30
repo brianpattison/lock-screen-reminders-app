@@ -49,7 +49,8 @@ struct RemindersTimelineProvider: TimelineProvider {
         let ekReminders: [EKReminder]
 
         if listID == SelectedListStore.todayID {
-            let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
+            let endOfDay = Calendar.current.date(
+                byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
             let predicate = store.predicateForIncompleteReminders(
                 withDueDateStarting: .distantPast,
                 ending: endOfDay,
@@ -78,7 +79,8 @@ struct RemindersTimelineProvider: TimelineProvider {
             }
         }
 
-        let items = ekReminders
+        let items =
+            ekReminders
             .map { reminder in
                 ReminderItem(
                     title: reminder.title ?? "",

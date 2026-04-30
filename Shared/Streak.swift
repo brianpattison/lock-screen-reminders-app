@@ -154,7 +154,8 @@ struct StreakEngine {
         var peakBest = baseState.bestCount
 
         if let last = normalizedLastQualified,
-           let firstGapDay = calendar.date(byAdding: .day, value: 1, to: last) {
+            let firstGapDay = calendar.date(byAdding: .day, value: 1, to: last)
+        {
             var dayCursor = firstGapDay
             while dayCursor < today {
                 guard let nextDay = calendar.date(byAdding: .day, value: 1, to: dayCursor) else { break }
@@ -267,7 +268,8 @@ struct StreakEngine {
         calendar: Calendar
     ) -> StreakEvaluation {
         let yesterday = calendar.date(byAdding: .day, value: -1, to: today)
-        let lastQualifiedToday = runningLastQualified
+        let lastQualifiedToday =
+            runningLastQualified
             .map { calendar.isDate($0, inSameDayAs: today) } ?? false
         let lastQualifiedYesterday: Bool = {
             guard let last = runningLastQualified, let yesterday else { return false }
@@ -282,13 +284,15 @@ struct StreakEngine {
         if !qualifiedToday {
             if lastQualifiedToday {
                 return StreakEvaluation(
-                    state: stateWith(base: baseState, listID: listID, count: runningCount, lastQualified: runningLastQualified),
+                    state: stateWith(
+                        base: baseState, listID: listID, count: runningCount, lastQualified: runningLastQualified),
                     isQualifiedToday: false
                 )
             }
             if lastQualifiedYesterday {
                 return StreakEvaluation(
-                    state: stateWith(base: baseState, listID: listID, count: runningCount, lastQualified: runningLastQualified),
+                    state: stateWith(
+                        base: baseState, listID: listID, count: runningCount, lastQualified: runningLastQualified),
                     isQualifiedToday: false
                 )
             }
@@ -306,7 +310,8 @@ struct StreakEngine {
 
         if lastQualifiedToday {
             return StreakEvaluation(
-                state: stateWith(base: baseState, listID: listID, count: runningCount, lastQualified: runningLastQualified),
+                state: stateWith(
+                    base: baseState, listID: listID, count: runningCount, lastQualified: runningLastQualified),
                 isQualifiedToday: true
             )
         }

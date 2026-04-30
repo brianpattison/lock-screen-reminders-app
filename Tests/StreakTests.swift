@@ -15,7 +15,7 @@ final class StreakTests: XCTestCase {
 
     func testNoOverdueIgnoresUndatedReminders() {
         let snapshot = StreakSnapshot(incompleteReminders: [
-            StreakReminder(dueDate: nil),
+            StreakReminder(dueDate: nil)
         ])
 
         XCTAssertTrue(engine.qualifies(mode: .noOverdue, snapshot: snapshot, now: now, calendar: calendar))
@@ -23,7 +23,7 @@ final class StreakTests: XCTestCase {
 
     func testNoOverdueFailsWithTimedOverdueReminder() {
         let snapshot = StreakSnapshot(incompleteReminders: [
-            StreakReminder(dueDate: now.addingTimeInterval(-60), dueDateIncludesTime: true),
+            StreakReminder(dueDate: now.addingTimeInterval(-60), dueDateIncludesTime: true)
         ])
 
         XCTAssertFalse(engine.qualifies(mode: .noOverdue, snapshot: snapshot, now: now, calendar: calendar))
@@ -32,7 +32,7 @@ final class StreakTests: XCTestCase {
     func testNoOverdueDoesNotTreatAllDayReminderDueTodayAsOverdue() {
         let today = calendar.startOfDay(for: now)
         let snapshot = StreakSnapshot(incompleteReminders: [
-            StreakReminder(dueDate: today, dueDateIncludesTime: false),
+            StreakReminder(dueDate: today, dueDateIncludesTime: false)
         ])
 
         XCTAssertTrue(engine.qualifies(mode: .noOverdue, snapshot: snapshot, now: now, calendar: calendar))
@@ -41,7 +41,7 @@ final class StreakTests: XCTestCase {
     func testNoOverdueTreatsAllDayReminderDueYesterdayAsOverdue() {
         let yesterday = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: now))!
         let snapshot = StreakSnapshot(incompleteReminders: [
-            StreakReminder(dueDate: yesterday, dueDateIncludesTime: false),
+            StreakReminder(dueDate: yesterday, dueDateIncludesTime: false)
         ])
 
         XCTAssertFalse(engine.qualifies(mode: .noOverdue, snapshot: snapshot, now: now, calendar: calendar))
@@ -69,8 +69,13 @@ final class StreakTests: XCTestCase {
     }
 
     func testEmptyListPassesOnlyWhenThereAreNoIncompleteReminders() {
-        XCTAssertTrue(engine.qualifies(mode: .emptyList, snapshot: StreakSnapshot(incompleteReminders: []), now: now, calendar: calendar))
-        XCTAssertFalse(engine.qualifies(mode: .emptyList, snapshot: StreakSnapshot(incompleteReminders: [StreakReminder(dueDate: nil)]), now: now, calendar: calendar))
+        XCTAssertTrue(
+            engine.qualifies(
+                mode: .emptyList, snapshot: StreakSnapshot(incompleteReminders: []), now: now, calendar: calendar))
+        XCTAssertFalse(
+            engine.qualifies(
+                mode: .emptyList, snapshot: StreakSnapshot(incompleteReminders: [StreakReminder(dueDate: nil)]),
+                now: now, calendar: calendar))
     }
 
     func testStreakIncrementsOncePerLocalDay() {
@@ -83,8 +88,10 @@ final class StreakTests: XCTestCase {
         )
         let snapshot = StreakSnapshot(incompleteReminders: [])
 
-        let firstEvaluation = engine.evaluate(state: state, listID: "list-1", snapshot: snapshot, now: now, calendar: calendar)
-        let secondEvaluation = engine.evaluate(state: firstEvaluation.state, listID: "list-1", snapshot: snapshot, now: now, calendar: calendar)
+        let firstEvaluation = engine.evaluate(
+            state: state, listID: "list-1", snapshot: snapshot, now: now, calendar: calendar)
+        let secondEvaluation = engine.evaluate(
+            state: firstEvaluation.state, listID: "list-1", snapshot: snapshot, now: now, calendar: calendar)
 
         XCTAssertEqual(firstEvaluation.state.currentCount, 3)
         XCTAssertEqual(firstEvaluation.state.bestCount, 3)
@@ -154,7 +161,7 @@ final class StreakTests: XCTestCase {
             state: state,
             listID: "list-1",
             snapshot: StreakSnapshot(incompleteReminders: [
-                StreakReminder(dueDate: now.addingTimeInterval(-60), dueDateIncludesTime: true),
+                StreakReminder(dueDate: now.addingTimeInterval(-60), dueDateIncludesTime: true)
             ]),
             now: now,
             calendar: calendar
@@ -266,7 +273,7 @@ final class StreakTests: XCTestCase {
             lastQualifiedDay: dayOffset(-2)
         )
         let history = StreakHistory(reminders: [
-            StreakHistoryReminder(creationDate: dayOffset(-1), completionDate: nil),
+            StreakHistoryReminder(creationDate: dayOffset(-1), completionDate: nil)
         ])
 
         let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
@@ -289,7 +296,7 @@ final class StreakTests: XCTestCase {
             lastQualifiedDay: dayOffset(-2)
         )
         let history = StreakHistory(reminders: [
-            StreakHistoryReminder(creationDate: yesterdayNoon, completionDate: yesterday3pm),
+            StreakHistoryReminder(creationDate: yesterdayNoon, completionDate: yesterday3pm)
         ])
 
         let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
@@ -309,7 +316,7 @@ final class StreakTests: XCTestCase {
         )
         // Reminder created 3 days ago, completed yesterday at noon. List empty rest of the time.
         let history = StreakHistory(reminders: [
-            StreakHistoryReminder(creationDate: dayOffset(-3), completionDate: yesterdayNoon),
+            StreakHistoryReminder(creationDate: dayOffset(-3), completionDate: yesterdayNoon)
         ])
 
         let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
@@ -328,7 +335,7 @@ final class StreakTests: XCTestCase {
             lastQualifiedDay: dayOffset(-2)
         )
         let history = StreakHistory(reminders: [
-            StreakHistoryReminder(creationDate: dayOffset(-2), completionDate: nil),
+            StreakHistoryReminder(creationDate: dayOffset(-2), completionDate: nil)
         ])
 
         let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
@@ -355,7 +362,7 @@ final class StreakTests: XCTestCase {
                 completionDate: hourOffset(13, from: dayOffset(-2)),
                 dueDate: twoDaysAgoNoon,
                 dueDateIncludesTime: true
-            ),
+            )
         ])
 
         let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
@@ -379,7 +386,7 @@ final class StreakTests: XCTestCase {
                 completionDate: nil,
                 dueDate: dayOffset(-2),
                 dueDateIncludesTime: true
-            ),
+            )
         ])
 
         let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
@@ -404,7 +411,7 @@ final class StreakTests: XCTestCase {
                 completionDate: nil,
                 dueDate: dayOffset(1),
                 dueDateIncludesTime: false
-            ),
+            )
         ])
 
         let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
@@ -426,7 +433,7 @@ final class StreakTests: XCTestCase {
             lastQualifiedDay: dayOffset(-4)
         )
         let history = StreakHistory(reminders: [
-            StreakHistoryReminder(creationDate: dayOffset(-2), completionDate: dayOffset(-1)),
+            StreakHistoryReminder(creationDate: dayOffset(-2), completionDate: dayOffset(-1))
         ])
 
         let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
@@ -470,7 +477,7 @@ final class StreakTests: XCTestCase {
             lastQualifiedDay: dayOffset(-1)
         )
         let history = StreakHistory(reminders: [
-            StreakHistoryReminder(creationDate: dayOffset(-2), completionDate: nil, dueDate: nil),
+            StreakHistoryReminder(creationDate: dayOffset(-2), completionDate: nil, dueDate: nil)
         ])
 
         let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
@@ -493,7 +500,7 @@ final class StreakTests: XCTestCase {
                 completionDate: nil,
                 dueDate: startOfDay(now),
                 dueDateIncludesTime: false
-            ),
+            )
         ])
 
         let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
@@ -596,7 +603,7 @@ final class StreakTests: XCTestCase {
             lastQualifiedDay: startOfDay(now)
         )
         let history = StreakHistory(reminders: [
-            StreakHistoryReminder(creationDate: earlierToday, completionDate: nil),
+            StreakHistoryReminder(creationDate: earlierToday, completionDate: nil)
         ])
 
         let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
@@ -612,7 +619,7 @@ final class StreakTests: XCTestCase {
         // both gap days end with the list non-empty and no completion -> neither qualifies.
         let twoDaysAgoNoon = hourOffset(12, from: dayOffset(-2))
         let history = StreakHistory(reminders: [
-            StreakHistoryReminder(creationDate: twoDaysAgoNoon, completionDate: nil),
+            StreakHistoryReminder(creationDate: twoDaysAgoNoon, completionDate: nil)
         ])
 
         let yesterdayQualifies = engine.qualifiesOnDay(

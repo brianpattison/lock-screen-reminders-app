@@ -19,7 +19,9 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if authStatus == .fullAccess, let listID = selectedListID, let listTitle = selectedListTitle, let listColor = selectedListColor {
+            if authStatus == .fullAccess, let listID = selectedListID, let listTitle = selectedListTitle,
+                let listColor = selectedListColor
+            {
                 ReminderDetailView(
                     listID: listID,
                     listTitle: listTitle,
@@ -32,10 +34,13 @@ struct ContentView: View {
                 emptyState
             }
         }
-        .sheet(isPresented: $showSettings, onDismiss: {
-            loadSelectedList()
-            loadStreakState()
-        }) {
+        .sheet(
+            isPresented: $showSettings,
+            onDismiss: {
+                loadSelectedList()
+                loadStreakState()
+            }
+        ) {
             settingsSheet
         }
         .onAppear {
@@ -150,7 +155,8 @@ struct ContentView: View {
                 } label: {
                     selectionLinkLabel(
                         title: selectedListTitle ?? "Select a list",
-                        subtitle: selectedListTitle == nil ? "Choose what appears in the widget." : "Used by the app and widget.",
+                        subtitle: selectedListTitle == nil
+                            ? "Choose what appears in the widget." : "Used by the app and widget.",
                         isPlaceholder: selectedListTitle == nil
                     )
                 }
@@ -232,9 +238,11 @@ struct ContentView: View {
     }
 
     private var deniedView: some View {
-        Text("Reminders access was denied. Go to **Settings \u{2192} Privacy & Security \u{2192} Reminders** and enable access for this app.")
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
+        Text(
+            "Reminders access was denied. Go to **Settings \u{2192} Privacy & Security \u{2192} Reminders** and enable access for this app."
+        )
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
     }
 
     private var requestAccessView: some View {
@@ -369,13 +377,15 @@ struct ContentView: View {
             let ekReminders: [EKReminder]
 
             if listID == SelectedListStore.todayID {
-                let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
+                let endOfDay = Calendar.current.date(
+                    byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
                 let predicate = eventStore.predicateForIncompleteReminders(
                     withDueDateStarting: .distantPast,
                     ending: endOfDay,
                     calendars: nil
                 )
-                ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
+                ekReminders = await withCheckedContinuation {
+                    (continuation: CheckedContinuation<[EKReminder], Never>) in
                     _ = eventStore.fetchReminders(matching: predicate) { reminders in
                         continuation.resume(returning: reminders ?? [])
                     }
@@ -392,14 +402,16 @@ struct ContentView: View {
                     ending: nil,
                     calendars: [calendar]
                 )
-                ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
+                ekReminders = await withCheckedContinuation {
+                    (continuation: CheckedContinuation<[EKReminder], Never>) in
                     _ = eventStore.fetchReminders(matching: predicate) { reminders in
                         continuation.resume(returning: reminders ?? [])
                     }
                 }
             }
 
-            let items = ekReminders
+            let items =
+                ekReminders
                 .map(\.reminderItem)
 
             guard !Task.isCancelled, selectedListID == listID else { return }

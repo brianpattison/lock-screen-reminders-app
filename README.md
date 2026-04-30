@@ -13,3 +13,17 @@ python3 generate_icon.py AppIcon.png
 ```
 
 Requires `numpy` and `Pillow` (`pip install numpy Pillow`).
+
+## Development
+
+Format Swift files with Apple's `swift-format`:
+
+```bash
+swift-format format --configuration .swift-format --recursive --parallel --in-place RemindersWidget RemindersWidgetExtension Shared Tests
+```
+
+Validate formatting with:
+
+```bash
+swift-format lint --configuration .swift-format --recursive --parallel --strict RemindersWidget RemindersWidgetExtension Shared Tests
+```
