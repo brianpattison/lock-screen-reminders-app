@@ -589,6 +589,52 @@ final class StreakTests: XCTestCase {
         XCTAssertEqual(evaluation.state.bestCount, 9)
     }
 
+    func testHistoryBackfillRestartsStreakWhenLastQualifiedDayIsOlderThanCap() {
+        // 45 days ago is past the 30-day walk cap, so even with empty history (list always empty)
+        // the old streak doesn't connect to the new walk. Walk runs the last 30 days, restart-at-1
+        // on the first walked day (its prev day != stored lastQualifiedDay), then climbs to 30.
+        // Today extends to 31. bestCount preserves the old high.
+        let cappedStart = calendar.date(byAdding: .day, value: -StreakEngine.walkLookbackDays, to: startOfDay(now))!
+        let firstWalkedDay = cappedStart  // dayCursor = max(firstGapDay = -44, cap = -30) = -30
+        // Sanity: 30 walked days from -30..<today plus today = 31.
+        XCTAssertEqual(calendar.dateComponents([.day], from: firstWalkedDay, to: startOfDay(now)).day, 30)
+
+        let state = StreakState(
+            mode: .emptyList,
+            listID: "list-1",
+            currentCount: 100,
+            bestCount: 100,
+            lastQualifiedDay: dayOffset(-45)
+        )
+        let history = StreakHistory(reminders: [])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        XCTAssertEqual(evaluation.state.currentCount, 31)
+        XCTAssertEqual(evaluation.state.bestCount, 100)
+        XCTAssertEqual(evaluation.state.lastQualifiedDay, startOfDay(now))
+        XCTAssertTrue(evaluation.isQualifiedToday)
+    }
+
+    func testHistoryBackfillContinuesStreakWhenLastQualifiedDayIsAtCapBoundary() {
+        // Exactly cap days ago: walk cap = today - cap, lastQualifiedDay = today - cap.
+        // firstGapDay = today - cap + 1. continuesStreak fires on first walked day, streak grows.
+        let state = StreakState(
+            mode: .emptyList,
+            listID: "list-1",
+            currentCount: 5,
+            bestCount: 5,
+            lastQualifiedDay: dayOffset(-StreakEngine.walkLookbackDays)
+        )
+        let history = StreakHistory(reminders: [])
+
+        let evaluation = engine.evaluate(state: state, listID: "list-1", history: history, now: now, calendar: calendar)
+
+        // 5 (base) + walkLookbackDays - 1 (walked days) + 1 (today) = 5 + walkLookbackDays
+        XCTAssertEqual(evaluation.state.currentCount, 5 + StreakEngine.walkLookbackDays)
+        XCTAssertTrue(evaluation.isQualifiedToday)
+    }
+
     func testHistoryStickyPreservesStreakCountButFlagsTodayNotCurrentlyQualified() {
         // Day was already earned earlier today (lastQualifiedDay = today, count = 5). The user
         // then added a reminder so the list is currently non-empty. The streak count and

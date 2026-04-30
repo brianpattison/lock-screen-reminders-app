@@ -18,9 +18,14 @@ extension EKReminder {
         )
     }
 
-    func streakHistoryReminder(creationDateFallback fallbackDate: Date = Date()) -> StreakHistoryReminder {
+    // Falls back to `completionDate` when EventKit reports no creation date (rare but possible
+    // for legacy/imported reminders). If both are nil, `.distantFuture` makes the reminder
+    // invisible to backfill — `isInList(_:at:)` requires `creationDate < moment`, so a
+    // distant-future creation never registers as existing on any past day. Better to drop
+    // the reminder than to spuriously break a No Overdue streak.
+    var streakHistoryReminder: StreakHistoryReminder {
         StreakHistoryReminder(
-            creationDate: creationDate ?? completionDate ?? fallbackDate,
+            creationDate: creationDate ?? completionDate ?? .distantFuture,
             completionDate: completionDate,
             dueDate: dueDateComponents.flatMap { Calendar.current.date(from: $0) },
             dueDateIncludesTime: dueDateComponents?.hasTimeComponents ?? true

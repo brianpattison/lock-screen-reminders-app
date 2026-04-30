@@ -71,6 +71,8 @@ struct ReminderDetailView: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text("\(streakState.currentCount)-day streak")
                     .font(.headline)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
                 Text(streakStatusMessage)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -82,9 +84,11 @@ struct ReminderDetailView: View {
                 Text("Best")
                     .font(.caption)
                     .fontWeight(.semibold)
+                    .lineLimit(1)
                 Text("\(streakState.bestCount) \(streakState.bestCount == 1 ? "day" : "days")")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
             }
         }
         .padding(.horizontal, 20)
@@ -202,12 +206,8 @@ struct ReminderDetailView: View {
                 )
             } else {
                 let history = StreakHistory(
-                    reminders: result.incompleteReminders.map {
-                        $0.streakHistoryReminder(creationDateFallback: result.historyCreationFallback)
-                    }
-                        + result.completedReminders.map {
-                            $0.streakHistoryReminder(creationDateFallback: result.historyCreationFallback)
-                        }
+                    reminders: result.incompleteReminders.map(\.streakHistoryReminder)
+                        + result.completedReminders.map(\.streakHistoryReminder)
                 )
                 evaluation = StreakEngine().evaluate(
                     state: storedState,
@@ -226,11 +226,16 @@ struct ReminderDetailView: View {
     }
 
     private func fetchReminderHistory(storedLastQualifiedDay: Date?) async -> ReminderFetchResult? {
-        let startOfDay = Calendar.current.startOfDay(for: Date())
-        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: Date())
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        // Match StreakEngine.walkLookbackDays so the fetch doesn't pull data the engine ignores.
+        let lookbackCap =
+            calendar.date(byAdding: .day, value: -StreakEngine.walkLookbackDays, to: startOfDay)
+            ?? startOfDay
         let lookbackStart: Date = {
             guard let last = storedLastQualifiedDay, last < startOfDay else { return startOfDay }
-            return last
+            return max(calendar.startOfDay(for: last), lookbackCap)
         }()
 
         let selectedCalendars: [EKCalendar]?
@@ -279,7 +284,6 @@ struct ReminderDetailView: View {
         return ReminderFetchResult(
             incompleteReminders: incompleteReminders,
             completedReminders: completedReminders,
-            historyCreationFallback: lookbackStart,
             completedTodayInScopeCount: completedTodayInScopeCount
         )
     }
@@ -296,6 +300,5 @@ struct ReminderDetailView: View {
 private struct ReminderFetchResult {
     let incompleteReminders: [EKReminder]
     let completedReminders: [EKReminder]
-    let historyCreationFallback: Date
     let completedTodayInScopeCount: Int
 }

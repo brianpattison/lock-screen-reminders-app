@@ -37,6 +37,8 @@ struct ContentView: View {
         .sheet(
             isPresented: $showSettings,
             onDismiss: {
+                pendingStreakChange = nil
+                showStreakResetConfirmation = false
                 loadSelectedList()
                 loadStreakState()
             }

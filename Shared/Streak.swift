@@ -109,6 +109,12 @@ struct StreakEvaluation: Equatable {
 }
 
 struct StreakEngine {
+    // History-based backfill walks at most this many days. Beyond this, EventKit data is
+    // unreliable: deleted reminders are invisible, so a credited day might actually have
+    // had outstanding work. Treating older gaps as broken trades a tiny bit of leniency
+    // for reliable correctness on long-inactive users.
+    static let walkLookbackDays: Int = 30
+
     func evaluate(
         state: StreakState,
         listID: String?,
@@ -153,10 +159,17 @@ struct StreakEngine {
         var runningLastQualified = normalizedLastQualified
         var peakBest = baseState.bestCount
 
+        // Cap how far back the walk can reach. Beyond this, EventKit data is unreliable
+        // for backfill: reminders the user deleted are gone, and a streak can be wrongly
+        // credited from history we can no longer verify. If `lastQualifiedDay` is older
+        // than the cap, the walk starts at the cap; the first walked day's continues-check
+        // fails (prev day != lastQualifiedDay), restarting the streak count at 1.
+        let walkStartCap = calendar.date(byAdding: .day, value: -Self.walkLookbackDays, to: today)
+
         if let last = normalizedLastQualified,
             let firstGapDay = calendar.date(byAdding: .day, value: 1, to: last)
         {
-            var dayCursor = firstGapDay
+            var dayCursor = walkStartCap.map { max(firstGapDay, $0) } ?? firstGapDay
             while dayCursor < today {
                 guard let nextDay = calendar.date(byAdding: .day, value: 1, to: dayCursor) else { break }
                 let qualified = qualifiesOnDay(
