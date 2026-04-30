@@ -11,34 +11,62 @@ struct ContentView: View {
     @State private var showSettings = false
     @State private var previewReminders: [ReminderItem] = []
     @State private var previewFetchTask: Task<Void, Never>?
+    @State private var streakState: StreakState = .empty
+    @State private var pendingStreakChange: PendingStreakChange?
+    @State private var showStreakResetConfirmation = false
+    @Environment(\.scenePhase) private var scenePhase
 
     private let eventStore = EKEventStore()
 
     var body: some View {
         Group {
-            if authStatus == .fullAccess, let listID = selectedListID, let listTitle = selectedListTitle, let listColor = selectedListColor {
+            if authStatus == .fullAccess, let listID = selectedListID, let listTitle = selectedListTitle,
+                let listColor = selectedListColor
+            {
                 ReminderDetailView(
                     listID: listID,
                     listTitle: listTitle,
                     listColor: listColor,
                     eventStore: eventStore,
+                    streakState: $streakState,
                     showSettings: $showSettings
                 )
             } else {
                 emptyState
             }
         }
-        .sheet(isPresented: $showSettings, onDismiss: loadSelectedList) {
+        .sheet(
+            isPresented: $showSettings,
+            onDismiss: {
+                pendingStreakChange = nil
+                showStreakResetConfirmation = false
+                loadSelectedList()
+                loadStreakState()
+            }
+        ) {
             settingsSheet
         }
         .onAppear {
             authStatus = EKEventStore.authorizationStatus(for: .reminder)
+            loadStreakState()
             if authStatus == .fullAccess {
                 loadLists()
                 loadSelectedList()
             }
             if selectedListID == nil || authStatus != .fullAccess {
                 showSettings = true
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            // The user can grant Reminders access from system Settings while we're backgrounded.
+            // Re-read auth status and reload list state on return so the denied/request UI
+            // doesn't stay stuck until the next app launch.
+            guard newPhase == .active else { return }
+            authStatus = EKEventStore.authorizationStatus(for: .reminder)
+            loadStreakState()
+            if authStatus == .fullAccess {
+                loadLists()
+                loadSelectedList()
             }
         }
     }
@@ -113,6 +141,16 @@ struct ContentView: View {
                     }
                 }
             }
+            .alert("Reset streak?", isPresented: $showStreakResetConfirmation) {
+                Button("Cancel", role: .cancel) {
+                    pendingStreakChange = nil
+                }
+                Button("Reset", role: .destructive) {
+                    applyPendingStreakChange()
+                }
+            } message: {
+                Text("Changing the widget list or streak goal starts a new streak.")
+            }
         }
     }
 
@@ -123,27 +161,43 @@ struct ContentView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
-                Menu {
-                    Button("Today") {
-                        selectList(id: SelectedListStore.todayID, title: "Today", color: .blue)
-                    }
-                    ForEach(availableLists, id: \.id) { list in
-                        Button(list.title) {
-                            selectList(id: list.id, title: list.title, color: list.color)
-                        }
-                    }
+                NavigationLink {
+                    WidgetListSelectionView(
+                        lists: availableLists,
+                        selectedListID: selectedListID,
+                        onSelect: requestListSelection
+                    )
                 } label: {
-                    HStack {
-                        Text(selectedListTitle ?? "Select a list")
-                            .foregroundStyle(selectedListTitle != nil ? .primary : .secondary)
-                        Spacer()
-                        Image(systemName: "chevron.up.chevron.down")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                    }
-                    .padding(12)
-                    .background(.fill.tertiary, in: RoundedRectangle(cornerRadius: 10))
+                    selectionLinkLabel(
+                        title: selectedListTitle ?? "Select a list",
+                        subtitle: selectedListTitle == nil
+                            ? "Choose what appears in the widget." : "Used by the app and widget.",
+                        isPlaceholder: selectedListTitle == nil
+                    )
                 }
+                .buttonStyle(.plain)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("STREAK GOAL")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                NavigationLink {
+                    StreakGoalSelectionView(
+                        availableModes: StreakMode.availableModes(forListID: selectedListID),
+                        selectedMode: streakState.mode,
+                        onSelect: requestStreakModeSelection
+                    )
+                } label: {
+                    selectionLinkLabel(
+                        title: streakState.mode.title,
+                        subtitle: streakState.mode.description,
+                        isPlaceholder: false
+                    )
+                }
+                .buttonStyle(.plain)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -175,13 +229,36 @@ struct ContentView: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .multilineTextAlignment(.leading)
         .onAppear { fetchPreviewReminders() }
     }
 
+    private func selectionLinkLabel(title: String, subtitle: String, isPlaceholder: Bool) -> some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .foregroundStyle(isPlaceholder ? .secondary : .primary)
+                    .lineLimit(1)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(12)
+        .background(.fill.tertiary, in: RoundedRectangle(cornerRadius: 10))
+    }
+
     private var deniedView: some View {
-        Text("Reminders access was denied. Go to **Settings \u{2192} Privacy & Security \u{2192} Reminders** and enable access for this app.")
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
+        Text(
+            "Reminders access was denied. Go to **Settings \u{2192} Privacy & Security \u{2192} Reminders** and enable access for this app."
+        )
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
     }
 
     private var requestAccessView: some View {
@@ -212,6 +289,10 @@ struct ContentView: View {
             .sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
     }
 
+    private func loadStreakState() {
+        streakState = StreakStore().state
+    }
+
     private func loadSelectedList() {
         let store = SelectedListStore()
         selectedListID = store.selectedListID
@@ -233,12 +314,24 @@ struct ContentView: View {
                 var mutableStore = SelectedListStore()
                 mutableStore.selectedListID = nil
                 mutableStore.selectedListTitle = nil
+                resetStreak(for: nil)
                 WidgetCenter.shared.reloadAllTimelines()
             }
         }
     }
 
-    private func selectList(id: String, title: String, color: Color) {
+    private func requestListSelection(id: String, title: String, color: Color) {
+        guard selectedListID != id else { return }
+
+        if streakState.currentCount > 0 {
+            pendingStreakChange = .list(id: id, title: title, color: color)
+            showStreakResetConfirmation = true
+        } else {
+            applyListSelection(id: id, title: title, color: color)
+        }
+    }
+
+    private func applyListSelection(id: String, title: String, color: Color) {
         selectedListID = id
         selectedListTitle = title
         selectedListColor = color
@@ -247,8 +340,53 @@ struct ContentView: View {
         store.selectedListID = id
         store.selectedListTitle = title
 
+        resetStreak(for: id)
+
         WidgetCenter.shared.reloadAllTimelines()
         fetchPreviewReminders()
+    }
+
+    private func requestStreakModeSelection(_ mode: StreakMode) {
+        guard streakState.mode != mode else { return }
+
+        if streakState.currentCount > 0 {
+            pendingStreakChange = .mode(mode)
+            showStreakResetConfirmation = true
+        } else {
+            applyStreakModeSelection(mode)
+        }
+    }
+
+    private func applyStreakModeSelection(_ mode: StreakMode) {
+        let resetState = StreakStore().state.reset(for: selectedListID, mode: mode)
+        var store = StreakStore()
+        store.state = resetState
+        streakState = resetState
+    }
+
+    private func resetStreak(for listID: String?) {
+        // Today list only supports No Overdue (see StreakMode.availableModes). When switching
+        // to Today, force the mode regardless of what was previously selected; switching away
+        // from Today leaves the mode at No Overdue, which the user can change via the picker.
+        let availableModes = StreakMode.availableModes(forListID: listID)
+        let modeOverride: StreakMode? = availableModes.contains(streakState.mode) ? nil : availableModes.first
+        let resetState = StreakStore().state.reset(for: listID, mode: modeOverride)
+        var store = StreakStore()
+        store.state = resetState
+        streakState = resetState
+    }
+
+    private func applyPendingStreakChange() {
+        guard let pendingStreakChange else { return }
+
+        switch pendingStreakChange {
+        case let .list(id, title, color):
+            applyListSelection(id: id, title: title, color: color)
+        case let .mode(mode):
+            applyStreakModeSelection(mode)
+        }
+
+        self.pendingStreakChange = nil
     }
 
     @MainActor private func fetchPreviewReminders() {
@@ -260,13 +398,15 @@ struct ContentView: View {
             let ekReminders: [EKReminder]
 
             if listID == SelectedListStore.todayID {
-                let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
+                let endOfDay = Calendar.current.date(
+                    byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
                 let predicate = eventStore.predicateForIncompleteReminders(
                     withDueDateStarting: .distantPast,
                     ending: endOfDay,
                     calendars: nil
                 )
-                ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
+                ekReminders = await withCheckedContinuation {
+                    (continuation: CheckedContinuation<[EKReminder], Never>) in
                     _ = eventStore.fetchReminders(matching: predicate) { reminders in
                         continuation.resume(returning: reminders ?? [])
                     }
@@ -283,25 +423,108 @@ struct ContentView: View {
                     ending: nil,
                     calendars: [calendar]
                 )
-                ekReminders = await withCheckedContinuation { (continuation: CheckedContinuation<[EKReminder], Never>) in
+                ekReminders = await withCheckedContinuation {
+                    (continuation: CheckedContinuation<[EKReminder], Never>) in
                     _ = eventStore.fetchReminders(matching: predicate) { reminders in
                         continuation.resume(returning: reminders ?? [])
                     }
                 }
             }
 
-            let items = ekReminders
-                .map { reminder in
-                    ReminderItem(
-                        title: reminder.title ?? "",
-                        dueDate: reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) },
-                        creationDate: reminder.creationDate,
-                        calendarItemIdentifier: reminder.calendarItemIdentifier
-                    )
-                }
+            let items =
+                ekReminders
+                .map(\.reminderItem)
 
             guard !Task.isCancelled, selectedListID == listID else { return }
             previewReminders = Array(sortReminders(items).prefix(3))
         }
+    }
+}
+
+private enum PendingStreakChange {
+    case list(id: String, title: String, color: Color)
+    case mode(StreakMode)
+}
+
+private struct WidgetListSelectionView: View {
+    let lists: [(id: String, title: String, color: Color)]
+    let selectedListID: String?
+    let onSelect: (String, String, Color) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        List {
+            Section {
+                listButton(id: SelectedListStore.todayID, title: "Today", color: .blue)
+                ForEach(lists, id: \.id) { list in
+                    listButton(id: list.id, title: list.title, color: list.color)
+                }
+            } footer: {
+                Text("The selected list appears in the app, widget preview, and Lock Screen widget.")
+            }
+        }
+        .navigationTitle("Widget List")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func listButton(id: String, title: String, color: Color) -> some View {
+        Button {
+            onSelect(id, title, color)
+            dismiss()
+        } label: {
+            HStack(spacing: 12) {
+                Circle()
+                    .fill(color)
+                    .frame(width: 10, height: 10)
+                Text(title)
+                    .foregroundStyle(.primary)
+                Spacer()
+                if selectedListID == id {
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(.tint)
+                }
+            }
+        }
+    }
+}
+
+private struct StreakGoalSelectionView: View {
+    let availableModes: [StreakMode]
+    let selectedMode: StreakMode
+    let onSelect: (StreakMode) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(availableModes) { mode in
+                    Button {
+                        onSelect(mode)
+                        dismiss()
+                    } label: {
+                        HStack(alignment: .top, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(mode.title)
+                                    .foregroundStyle(.primary)
+                                Text(mode.description)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if selectedMode == mode {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.tint)
+                            }
+                        }
+                    }
+                }
+            } footer: {
+                Text("Changing the goal resets the current streak after confirmation.")
+            }
+        }
+        .navigationTitle("Streak Goal")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
