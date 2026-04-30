@@ -124,10 +124,11 @@ struct ReminderDetailView: View {
     }
 
     private var reminderList: some View {
-        List {
+        let now = Date()
+        return List {
             Section {
                 ForEach(reminders) { reminder in
-                    reminderRow(reminder)
+                    reminderRow(reminder, now: now)
                         .transition(.opacity.combined(with: .move(edge: .leading)))
                 }
             }
@@ -147,10 +148,10 @@ struct ReminderDetailView: View {
         .listStyle(.plain)
     }
 
-    private func reminderRow(_ reminder: ReminderItem) -> some View {
+    private func reminderRow(_ reminder: ReminderItem, now: Date) -> some View {
         let isCompleting = completingIDs.contains(reminder.id)
         let dueLabel = reminder.dueDate.map {
-            formatReminderDueDate($0, includesTime: reminder.dueDateIncludesTime, now: Date())
+            formatReminderDueDate($0, includesTime: reminder.dueDateIncludesTime, now: now)
         }
         let metadataStyle: AnyShapeStyle =
             (dueLabel?.isOverdue ?? false)
