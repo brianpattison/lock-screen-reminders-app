@@ -46,10 +46,11 @@ struct ReminderDetailView: View {
 
     private var header: some View {
         HStack {
-            Text("Lock Screen Reminders")
+            Text(listTitle)
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundStyle(listColor)
+                .lineLimit(1)
             Spacer()
             Button {
                 showSettings = true
@@ -66,12 +67,6 @@ struct ReminderDetailView: View {
 
     private var streakSummary: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(listTitle)
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundStyle(listColor)
-                .lineLimit(1)
-
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("\(streakState.currentCount) \(streakState.currentCount == 1 ? "day" : "days")")
@@ -115,7 +110,7 @@ struct ReminderDetailView: View {
 
     private var reminderList: some View {
         List {
-            Section("Reminders") {
+            Section {
                 ForEach(reminders) { reminder in
                     reminderRow(reminder)
                         .transition(.opacity.combined(with: .move(edge: .leading)))
