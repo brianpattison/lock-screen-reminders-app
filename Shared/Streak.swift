@@ -231,31 +231,29 @@ struct StreakEngine {
         }
     }
 
+    // Qualification is point-in-time at the upper bound of the window:
+    //   past day D -> moment is end_of_D (= start of D+1)
+    //   today      -> moment is `now`
+    // The check answers "is the goal met at this moment?" using strict `<` boundaries so a
+    // reminder created or completed exactly at midnight belongs to the next day, not the prior one.
     func qualifiesOnDay(
         mode: StreakMode,
         history: StreakHistory,
         dayWindow: Range<Date>,
         calendar: Calendar = .current
     ) -> Bool {
+        guard !dayWindow.isEmpty else { return false }
+        let moment = dayWindow.upperBound
         switch mode {
         case .dailyProgress:
             if hasCompletion(in: dayWindow, history: history) {
                 return true
             }
-            return hasUncoveredMoment(
-                dayWindow: dayWindow,
-                intervals: incompleteIntervals(history: history)
-            )
+            return incompleteCount(at: moment, history: history) == 0
         case .emptyList:
-            return hasUncoveredMoment(
-                dayWindow: dayWindow,
-                intervals: incompleteIntervals(history: history)
-            )
+            return incompleteCount(at: moment, history: history) == 0
         case .noOverdue:
-            return hasUncoveredMoment(
-                dayWindow: dayWindow,
-                intervals: overdueIntervals(history: history, calendar: calendar)
-            )
+            return overdueCount(at: moment, history: history, calendar: calendar) == 0
         }
     }
 
@@ -276,11 +274,16 @@ struct StreakEngine {
             return calendar.isDate(last, inSameDayAs: yesterday)
         }()
 
+        // `isQualifiedToday` reflects the live qualification check at `now` — it tracks the UI
+        // "Today: Complete / Finish the list" label, which must match what the user currently
+        // sees. The streak count and `lastQualifiedDay` are preserved separately via sticky
+        // logic, so a day earned earlier stays in the streak history even if the user later
+        // re-violates the goal.
         if !qualifiedToday {
             if lastQualifiedToday {
                 return StreakEvaluation(
                     state: stateWith(base: baseState, listID: listID, count: runningCount, lastQualified: runningLastQualified),
-                    isQualifiedToday: true
+                    isQualifiedToday: false
                 )
             }
             if lastQualifiedYesterday {
@@ -333,17 +336,26 @@ struct StreakEngine {
         }
     }
 
-    private func incompleteIntervals(history: StreakHistory) -> [Range<Date>] {
-        history.reminders.compactMap { reminder -> Range<Date>? in
-            let end = reminder.completionDate ?? .distantFuture
-            guard reminder.creationDate < end else { return nil }
-            return reminder.creationDate..<end
+    // Tests "state immediately before `moment`": creation strictly before, completion not yet
+    // reached. A reminder created or completed at exactly `moment` is treated as belonging to
+    // whatever day starts at `moment`, not the prior day.
+    private func isInList(_ reminder: StreakHistoryReminder, at moment: Date) -> Bool {
+        guard reminder.creationDate < moment else { return false }
+        if let completed = reminder.completionDate, completed < moment {
+            return false
+        }
+        return true
+    }
+
+    private func incompleteCount(at moment: Date, history: StreakHistory) -> Int {
+        history.reminders.reduce(into: 0) { count, reminder in
+            if isInList(reminder, at: moment) { count += 1 }
         }
     }
 
-    private func overdueIntervals(history: StreakHistory, calendar: Calendar) -> [Range<Date>] {
-        history.reminders.compactMap { reminder -> Range<Date>? in
-            guard let dueDate = reminder.dueDate else { return nil }
+    private func overdueCount(at moment: Date, history: StreakHistory, calendar: Calendar) -> Int {
+        history.reminders.reduce(into: 0) { count, reminder in
+            guard isInList(reminder, at: moment), let dueDate = reminder.dueDate else { return }
             let threshold: Date
             if reminder.dueDateIncludesTime {
                 threshold = dueDate
@@ -351,36 +363,8 @@ struct StreakEngine {
                 let dueStartOfDay = calendar.startOfDay(for: dueDate)
                 threshold = calendar.date(byAdding: .day, value: 1, to: dueStartOfDay) ?? dueDate
             }
-            let start = max(reminder.creationDate, threshold)
-            let end = reminder.completionDate ?? .distantFuture
-            guard start < end else { return nil }
-            return start..<end
+            if threshold < moment { count += 1 }
         }
-    }
-
-    // Returns true if any moment in `dayWindow` is not covered by any blocking interval.
-    // O(n log n) sweep: sort intervals by start, advance a coverage frontier; a gap means uncovered.
-    private func hasUncoveredMoment(
-        dayWindow: Range<Date>,
-        intervals: [Range<Date>]
-    ) -> Bool {
-        guard !dayWindow.isEmpty else { return false }
-
-        let relevant = intervals.filter { $0.overlaps(dayWindow) }
-        if relevant.isEmpty { return true }
-
-        let sorted = relevant.sorted { $0.lowerBound < $1.lowerBound }
-        var coverage = dayWindow.lowerBound
-        for interval in sorted {
-            if interval.lowerBound > coverage {
-                return true
-            }
-            coverage = max(coverage, interval.upperBound)
-            if coverage >= dayWindow.upperBound {
-                return false
-            }
-        }
-        return coverage < dayWindow.upperBound
     }
 
     private func isOverdue(_ reminder: StreakReminder, now: Date, calendar: Calendar) -> Bool {
