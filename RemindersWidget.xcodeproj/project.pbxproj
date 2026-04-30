@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		025A3AD495252B0DFF72B217 /* ReminderRecurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E757CA74DB3D8D9D6F8E71 /* ReminderRecurrence.swift */; };
 		2177894E5882791340E8C8EE /* RemindersTimelineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC6C1A566ADA0238F892085 /* RemindersTimelineProvider.swift */; };
+		2654F702F65843D2464E1F8E /* ReminderDueDateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41F68CFF083BA621A39F52F4 /* ReminderDueDateFormatter.swift */; };
 		27D18EF6C866453FD0364ED2 /* Streak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F08C26470F54E33A2087722 /* Streak.swift */; };
 		31C712936EE7E2A3D8D1E855 /* ReminderDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18CDCF5343E43D3B5D646B79 /* ReminderDetailView.swift */; };
 		33F42AEBE1AC5F7E93F0320A /* ReminderItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C7264B25C92FC2EB631428B /* ReminderItem.swift */; };
@@ -17,8 +19,10 @@
 		419C35BB15F1D042C9BA26AA /* SelectedListStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22832FF3498365ADB9BCED95 /* SelectedListStoreTests.swift */; };
 		4B52F161E7AEDB0CEAC49374 /* ReminderEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F06D0F468A53B092C2B278A /* ReminderEntry.swift */; };
 		561BC939EB7136D96386B233 /* ReminderListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13ADDE3707989BFC52BF5E0 /* ReminderListView.swift */; };
+		5898F052F3A01963BBDAEECB /* ReminderRecurrenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D82A43E354A6FD9D9D0798 /* ReminderRecurrenceTests.swift */; };
 		5F2073C1217866CFBF47681D /* ReminderListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13ADDE3707989BFC52BF5E0 /* ReminderListView.swift */; };
 		66DC4BF61784A0BB997C95E2 /* RemindersWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D51594DB2D095395C70D57D /* RemindersWidgetBundle.swift */; };
+		6963F75CD458367424B20889 /* ReminderDueDateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41F68CFF083BA621A39F52F4 /* ReminderDueDateFormatter.swift */; };
 		6968D08D0A8A29532CE2AF3C /* SelectedListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC726CC55ADDEFEDDC6F6B3D /* SelectedListStore.swift */; };
 		75414224CAE7BAC9F88FED96 /* RemindersLockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D3F2ADD9C217046F8E5AA4F /* RemindersLockScreenWidget.swift */; };
 		7F9C8F743FD793FD6C6518C4 /* SelectedListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC726CC55ADDEFEDDC6F6B3D /* SelectedListStore.swift */; };
@@ -28,9 +32,13 @@
 		A25FDACB1F2ADE94462B62D6 /* RemindersWidgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C0938BCB77EAD48E521E9EB /* RemindersWidgetApp.swift */; };
 		A9277B2E8BF4D937B7BDFEDB /* Streak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F08C26470F54E33A2087722 /* Streak.swift */; };
 		AA02851BA251553E225B6FF5 /* ReminderItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C7264B25C92FC2EB631428B /* ReminderItem.swift */; };
+		AECF8664D8B373607EC4820E /* ReminderDueDateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41F68CFF083BA621A39F52F4 /* ReminderDueDateFormatter.swift */; };
+		B1972A80E0E68A4E03001D15 /* ReminderDueDateFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB49F35C5372AF4427E5762 /* ReminderDueDateFormatterTests.swift */; };
 		B8A593FD9B011D4A2AB0EBAE /* SelectedListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC726CC55ADDEFEDDC6F6B3D /* SelectedListStore.swift */; };
 		C236F250EFBBE448852B1B95 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA8AC5DBEC6EC0E0A7CB05C /* ContentView.swift */; };
+		C2C2938FE9521D32AC43CD21 /* ReminderRecurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E757CA74DB3D8D9D6F8E71 /* ReminderRecurrence.swift */; };
 		C7256AE17F18B60F3861BD18 /* StreakTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B147530ADEC8C2EC6FD01F8 /* StreakTests.swift */; };
+		CFE9FF3BB08D2243BCE2C1D1 /* ReminderRecurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E757CA74DB3D8D9D6F8E71 /* ReminderRecurrence.swift */; };
 		E351A4685E8E20032803AEA8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CE503C61B04B327F7144F66A /* Assets.xcassets */; };
 		F054B7EEBB9CB8612065735F /* RemindersWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D86AB43E8ADD9A682363D2B /* RemindersWidgetView.swift */; };
 /* End PBXBuildFile section */
@@ -74,9 +82,12 @@
 		2D51594DB2D095395C70D57D /* RemindersWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersWidgetBundle.swift; sourceTree = "<group>"; };
 		3D86AB43E8ADD9A682363D2B /* RemindersWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersWidgetView.swift; sourceTree = "<group>"; };
 		41B4D64FB7C0297C2F010024 /* RemindersWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RemindersWidgetExtension.entitlements; sourceTree = "<group>"; };
+		41F68CFF083BA621A39F52F4 /* ReminderDueDateFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderDueDateFormatter.swift; sourceTree = "<group>"; };
 		42944864AFB07BA0AEFB99FB /* ReminderSortingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderSortingTests.swift; sourceTree = "<group>"; };
+		46D82A43E354A6FD9D9D0798 /* ReminderRecurrenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderRecurrenceTests.swift; sourceTree = "<group>"; };
 		5F252BC69F06EEAD565FF4F3 /* RemindersWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RemindersWidget.entitlements; sourceTree = "<group>"; };
 		6B147530ADEC8C2EC6FD01F8 /* StreakTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakTests.swift; sourceTree = "<group>"; };
+		6FB49F35C5372AF4427E5762 /* ReminderDueDateFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderDueDateFormatterTests.swift; sourceTree = "<group>"; };
 		740840A9AFB3872AA2C9CF0D /* ReminderEventKitHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderEventKitHelpers.swift; sourceTree = "<group>"; };
 		7C0938BCB77EAD48E521E9EB /* RemindersWidgetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersWidgetApp.swift; sourceTree = "<group>"; };
 		7C7264B25C92FC2EB631428B /* ReminderItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderItem.swift; sourceTree = "<group>"; };
@@ -85,6 +96,7 @@
 		8F06D0F468A53B092C2B278A /* ReminderEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderEntry.swift; sourceTree = "<group>"; };
 		9F08C26470F54E33A2087722 /* Streak.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Streak.swift; sourceTree = "<group>"; };
 		ACA8AC5DBEC6EC0E0A7CB05C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B8E757CA74DB3D8D9D6F8E71 /* ReminderRecurrence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderRecurrence.swift; sourceTree = "<group>"; };
 		CE503C61B04B327F7144F66A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F13ADDE3707989BFC52BF5E0 /* ReminderListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderListView.swift; sourceTree = "<group>"; };
 		FC4AFDD3CB539EBBB2A75906 /* RemindersWidgetExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = RemindersWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -107,6 +119,8 @@
 		6F0A91BA86EA9349E52F11FF /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				6FB49F35C5372AF4427E5762 /* ReminderDueDateFormatterTests.swift */,
+				46D82A43E354A6FD9D9D0798 /* ReminderRecurrenceTests.swift */,
 				42944864AFB07BA0AEFB99FB /* ReminderSortingTests.swift */,
 				22832FF3498365ADB9BCED95 /* SelectedListStoreTests.swift */,
 				6B147530ADEC8C2EC6FD01F8 /* StreakTests.swift */,
@@ -152,8 +166,10 @@
 		F6E03DC03A126199AC5F70A5 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				41F68CFF083BA621A39F52F4 /* ReminderDueDateFormatter.swift */,
 				7C7264B25C92FC2EB631428B /* ReminderItem.swift */,
 				F13ADDE3707989BFC52BF5E0 /* ReminderListView.swift */,
+				B8E757CA74DB3D8D9D6F8E71 /* ReminderRecurrence.swift */,
 				FC726CC55ADDEFEDDC6F6B3D /* SelectedListStore.swift */,
 				9F08C26470F54E33A2087722 /* Streak.swift */,
 			);
@@ -275,9 +291,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6963F75CD458367424B20889 /* ReminderDueDateFormatter.swift in Sources */,
 				4B52F161E7AEDB0CEAC49374 /* ReminderEntry.swift in Sources */,
 				33F42AEBE1AC5F7E93F0320A /* ReminderItem.swift in Sources */,
 				4033DAC8371499761217F6F6 /* ReminderListView.swift in Sources */,
+				025A3AD495252B0DFF72B217 /* ReminderRecurrence.swift in Sources */,
 				75414224CAE7BAC9F88FED96 /* RemindersLockScreenWidget.swift in Sources */,
 				2177894E5882791340E8C8EE /* RemindersTimelineProvider.swift in Sources */,
 				66DC4BF61784A0BB997C95E2 /* RemindersWidgetBundle.swift in Sources */,
@@ -293,9 +311,11 @@
 			files = (
 				C236F250EFBBE448852B1B95 /* ContentView.swift in Sources */,
 				31C712936EE7E2A3D8D1E855 /* ReminderDetailView.swift in Sources */,
+				AECF8664D8B373607EC4820E /* ReminderDueDateFormatter.swift in Sources */,
 				82C6E0CD9B3C4D1B7F955FB7 /* ReminderEventKitHelpers.swift in Sources */,
 				AA02851BA251553E225B6FF5 /* ReminderItem.swift in Sources */,
 				5F2073C1217866CFBF47681D /* ReminderListView.swift in Sources */,
+				C2C2938FE9521D32AC43CD21 /* ReminderRecurrence.swift in Sources */,
 				A25FDACB1F2ADE94462B62D6 /* RemindersWidgetApp.swift in Sources */,
 				6968D08D0A8A29532CE2AF3C /* SelectedListStore.swift in Sources */,
 				A9277B2E8BF4D937B7BDFEDB /* Streak.swift in Sources */,
@@ -306,8 +326,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2654F702F65843D2464E1F8E /* ReminderDueDateFormatter.swift in Sources */,
+				B1972A80E0E68A4E03001D15 /* ReminderDueDateFormatterTests.swift in Sources */,
 				36D50988132C8F651EAB99F6 /* ReminderItem.swift in Sources */,
 				561BC939EB7136D96386B233 /* ReminderListView.swift in Sources */,
+				CFE9FF3BB08D2243BCE2C1D1 /* ReminderRecurrence.swift in Sources */,
+				5898F052F3A01963BBDAEECB /* ReminderRecurrenceTests.swift in Sources */,
 				86443101D3F8D7BF543D8B0C /* ReminderSortingTests.swift in Sources */,
 				7F9C8F743FD793FD6C6518C4 /* SelectedListStore.swift in Sources */,
 				419C35BB15F1D042C9BA26AA /* SelectedListStoreTests.swift in Sources */,

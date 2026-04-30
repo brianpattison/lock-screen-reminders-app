@@ -149,16 +149,38 @@ struct ReminderDetailView: View {
 
     private func reminderRow(_ reminder: ReminderItem) -> some View {
         let isCompleting = completingIDs.contains(reminder.id)
+        let dueLabel = reminder.dueDate.map {
+            formatReminderDueDate($0, includesTime: reminder.dueDateIncludesTime, now: Date())
+        }
+        let metadataStyle: AnyShapeStyle =
+            (dueLabel?.isOverdue ?? false)
+            ? AnyShapeStyle(.red) : AnyShapeStyle(.secondary)
+
         return Button {
             completeReminder(reminder)
         } label: {
-            HStack(spacing: 12) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
                 Image(systemName: isCompleting ? "checkmark.circle.fill" : "circle")
                     .font(.title2)
                     .foregroundStyle(isCompleting ? AnyShapeStyle(.tint) : AnyShapeStyle(.tertiary))
-                Text(reminder.title)
-                    .strikethrough(isCompleting)
-                    .foregroundStyle(isCompleting ? .secondary : .primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(reminder.title)
+                        .strikethrough(isCompleting)
+                        .foregroundStyle(isCompleting ? .secondary : .primary)
+                    if let dueLabel {
+                        Text(dueLabel.text)
+                            .font(.caption)
+                            .foregroundStyle(metadataStyle)
+                    }
+                    if let recurrence = reminder.recurrence {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                            Text(recurrence.displayText)
+                        }
+                        .font(.caption)
+                        .foregroundStyle(metadataStyle)
+                    }
+                }
             }
         }
         .disabled(isCompleting)
