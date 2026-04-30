@@ -37,6 +37,13 @@ struct ReminderDetailView: View {
             isStreakQualifiedToday = false
             fetchReminders()
         }
+        .onChange(of: streakState.mode) { _, _ in
+            // Goal change in settings resets streak state in the store; re-evaluate against
+            // the current list contents so the banner doesn't show a stale 0-day streak when
+            // the new mode trivially qualifies today (e.g. switched to Empty List on an
+            // already-empty list).
+            fetchReminders()
+        }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
                 fetchReminders()
@@ -184,8 +191,17 @@ struct ReminderDetailView: View {
     @MainActor private func fetchReminders() {
         fetchTask?.cancel()
         fetchTask = Task {
+            // Capture "now" once and thread it through the EventKit fetch and the streak
+            // evaluation so they can't disagree about what "today" is — e.g. if the task
+            // happens to span midnight or a timezone change.
+            let now = Date()
             let storedState = StreakStore().state
-            guard let result = await fetchReminderHistory(storedLastQualifiedDay: storedState.lastQualifiedDay) else {
+            guard
+                let result = await fetchReminderHistory(
+                    now: now,
+                    storedLastQualifiedDay: storedState.lastQualifiedDay
+                )
+            else {
                 guard !Task.isCancelled else { return }
                 reminders = []
                 return
@@ -202,7 +218,8 @@ struct ReminderDetailView: View {
                 evaluation = StreakEngine().evaluate(
                     state: storedState,
                     listID: listID,
-                    snapshot: snapshot
+                    snapshot: snapshot,
+                    now: now
                 )
             } else {
                 let history = StreakHistory(
@@ -212,7 +229,8 @@ struct ReminderDetailView: View {
                 evaluation = StreakEngine().evaluate(
                     state: storedState,
                     listID: listID,
-                    history: history
+                    history: history,
+                    now: now
                 )
             }
 
@@ -225,9 +243,9 @@ struct ReminderDetailView: View {
         }
     }
 
-    private func fetchReminderHistory(storedLastQualifiedDay: Date?) async -> ReminderFetchResult? {
+    private func fetchReminderHistory(now: Date, storedLastQualifiedDay: Date?) async -> ReminderFetchResult? {
         let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: Date())
+        let startOfDay = calendar.startOfDay(for: now)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
         // Match StreakEngine.walkLookbackDays so the fetch doesn't pull data the engine ignores.
         let lookbackCap =
