@@ -66,21 +66,24 @@ struct ReminderDetailView: View {
     }
 
     private var streakSummary: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .center, spacing: 12) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("\(streakState.currentCount) day streak")
-                        .font(.headline)
-                    Text(streakStatusMessage)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("\(streakState.currentCount) day streak")
+                    .font(.headline)
+                Text(streakStatusMessage)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
 
-                Spacer()
+            Spacer()
 
-                Text("Best \(streakState.bestCount)")
+            VStack(alignment: .trailing, spacing: 3) {
+                Text("Best")
                     .font(.caption)
                     .fontWeight(.semibold)
+                Text("\(streakState.bestCount) \(streakState.bestCount == 1 ? "day" : "days")")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
         .padding(.horizontal, 20)
