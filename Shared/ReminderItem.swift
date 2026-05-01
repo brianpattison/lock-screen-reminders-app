@@ -4,13 +4,24 @@ struct ReminderItem: Identifiable {
     let id: String
     let title: String
     let dueDate: Date?
+    let dueDateIncludesTime: Bool
     let creationDate: Date?
+    let recurrence: ReminderRecurrence?
 
-    init(title: String, dueDate: Date?, creationDate: Date?, calendarItemIdentifier: String? = nil) {
+    init(
+        title: String,
+        dueDate: Date?,
+        dueDateIncludesTime: Bool = false,
+        creationDate: Date?,
+        recurrence: ReminderRecurrence? = nil,
+        calendarItemIdentifier: String? = nil
+    ) {
         self.id = calendarItemIdentifier ?? UUID().uuidString
         self.title = title
         self.dueDate = dueDate
+        self.dueDateIncludesTime = dueDateIncludesTime
         self.creationDate = creationDate
+        self.recurrence = recurrence
     }
 }
 

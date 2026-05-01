@@ -149,13 +149,13 @@ Since this is a Lock Screen widget app with a useful host app, screenshots shoul
 
 **Screenshot 1 -- The Widget in Action**
 - Show an iPhone Lock Screen with the Reminders Widget visible in the widget area below the clock.
-- The widget should display 3 reminders from a realistic-looking habit list (e.g., "Daily Routine" with items like "Take vitamins," "Walk 10 minutes," and "Read 10 pages").
+- The widget should display 3 reminders from a realistic-looking habit list (e.g., "Daily Routine" with daily repeating items like "Take vitamins," "Walk 10 minutes," and "Read 10 pages").
 - This is your hero screenshot. It should immediately communicate what the app does.
 - Consider adding a brief overlay caption: "See 3 reminders on your Lock Screen"
 
 **Screenshot 2 -- Native List View**
 - Show the app displaying the selected reminder list with the streak summary at the top.
-- Include a few realistic reminders and the "Open Reminders" action.
+- Include a few realistic daily repeating reminders with the recurrence label visible, plus the "Open Reminders" action.
 - Overlay caption: "View and complete the selected list"
 
 **Screenshot 3 -- List Selection and Streak Goal**
@@ -176,7 +176,7 @@ Since this is a Lock Screen widget app with a useful host app, screenshots shoul
 
 ### Important Notes
 
-- Populate the Reminders app in Simulator with sample data before capturing screenshots. You can do this by opening the Reminders app in Simulator and adding items manually, or by using EventKit in a test to create sample reminders.
+- Populate the Reminders app in Simulator with sample data before capturing screenshots. Use the `Daily Routine` list with each sample reminder set to repeat daily. You can do this by opening the Reminders app in Simulator and adding items manually, or by using EventKit in a test to create sample reminders.
 - Make sure the Lock Screen looks clean: use a simple wallpaper, set an appropriate time (like 9:41 AM, which Apple uses in marketing), and remove distracting notifications.
 
 ---

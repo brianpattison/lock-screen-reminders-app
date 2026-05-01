@@ -22,9 +22,14 @@ xcodegen generate
 # Build the project
 xcodebuild build -scheme RemindersWidget -destination 'platform=iOS Simulator,name=iPhone 16' -quiet
 
+# Lint Swift formatting (matches GitHub Actions)
+swift-format lint --configuration .swift-format --recursive --parallel --strict RemindersWidget RemindersWidgetExtension Shared Tests
+
 # Run tests
 xcodebuild test -scheme RemindersWidgetTests -destination 'platform=iOS Simulator,name=iPhone 16' -quiet
 ```
+
+After making code changes, do not present the work as completed until the same checks used by the GitHub Actions workflow pass locally: the `swift-format lint` command above and the `xcodebuild test` command for `RemindersWidgetTests`. Check `.github/workflows/ci.yml` before running them to make sure the local commands still match CI. If `iPhone 16` is not installed locally, use another available iOS simulator destination.
 
 ## Architecture
 

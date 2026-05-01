@@ -6,7 +6,10 @@ extension EKReminder {
         ReminderItem(
             title: title ?? "",
             dueDate: dueDateComponents.flatMap { Calendar.current.date(from: $0) },
+            dueDateIncludesTime: dueDateComponents?.hasTimeComponents ?? false,
             creationDate: creationDate,
+            recurrence: hasRecurrenceRules
+                ? recurrenceRules?.first.map(ReminderRecurrence.init(rule:)) : nil,
             calendarItemIdentifier: calendarItemIdentifier
         )
     }
@@ -37,5 +40,38 @@ extension EKReminder {
 private extension DateComponents {
     var hasTimeComponents: Bool {
         hour != nil || minute != nil || second != nil || nanosecond != nil
+    }
+}
+
+extension ReminderRecurrence {
+    init(rule: EKRecurrenceRule) {
+        // Anything beyond a plain frequency+interval — specific weekdays, months, ordinal
+        // positions like "first Monday" — falls back to the generic "Repeats" label rather
+        // than trying to reproduce Apple's full rule formatting.
+        let isComplex =
+            (rule.daysOfTheWeek?.isEmpty == false)
+            || (rule.daysOfTheMonth?.isEmpty == false)
+            || (rule.daysOfTheYear?.isEmpty == false)
+            || (rule.weeksOfTheYear?.isEmpty == false)
+            || (rule.monthsOfTheYear?.isEmpty == false)
+            || (rule.setPositions?.isEmpty == false)
+
+        if isComplex {
+            self = .complex
+            return
+        }
+
+        let frequency: Frequency
+        switch rule.frequency {
+        case .daily: frequency = .daily
+        case .weekly: frequency = .weekly
+        case .monthly: frequency = .monthly
+        case .yearly: frequency = .yearly
+        @unknown default:
+            self = .complex
+            return
+        }
+
+        self = .interval(frequency: frequency, count: max(1, rule.interval))
     }
 }
